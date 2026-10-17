@@ -1,0 +1,19 @@
+# Calculator runs; keep the analysis scripts.
+/bitcalctess/calculator/*/log/*
+/bitcalctess/calculator/*/output/*
+/bitcalctess/calculator/*/log-*/
+/bitcalctess/calculator/*/output-*/
+!/bitcalctess/calculator/java/log/analyze_logs.py
+!/bitcalctess/calculator/java/output/analyze_output.py
+
+# Build products and Python caches.
+build/
+.test-build/
+*.class
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Generated archives.
+/chatbot/mcp.zip
+/bitcalctess/calculator/java-ai/results.zip

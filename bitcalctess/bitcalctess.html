@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Binary Necklace Calculator</title>
+<link rel='stylesheet' href='../style.css'>
+<link rel='icon' type='image/x-icon' href='../favicon.ico'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'></meta>
+<style>
+	button, input {
+		background-color: #2d2b38;
+		border: none;
+		color: #ffffff
+	}
+	button {
+		cursor: pointer
+	}
+	input {
+		font-family: monospace
+	}
+	.submit:active {
+		background-color: #dddd00
+	}
+	.loading-c, .loading-c *, .loading-t, .loading-t * {
+		cursor: wait
+	}
+	table {
+		border-spacing: 10px
+	}
+	.c1 {
+		width: 240px;
+	}
+	.c2 {
+		background-color: #2d2b38;
+		width: 225px;
+		max-width: 225px;
+		font-family: monospace
+	}
+	.c2i {
+		background-color: #2d2b38
+	}
+	.cp {
+		background-color: #444444;
+		max-height: 16px
+	}
+	.svg-button {
+		display: inline-block
+	}
+	.svg-button svg {
+		vertical-align: top;
+		cursor: pointer;
+		width: 20px;
+		height: 20px
+	}
+	.active {
+		display: none
+	}
+	img {
+		max-width: 100%;
+		max-height: 100%;
+	}
+</style>
+</head>
+
+<body>
+<div class='margin'>
+<a href='../binary-necklaces.html'>&#8592;</a>
+<p id='title'>Binary Necklace Calculator and Tessellator</p>
+
+<br>
+<table>
+	<tr>
+		<td class='c1'>Enter a binary word: </td>
+		<td class='c2i'><input id='bitstring' minlength='1' maxlength='64' size='28'></td>
+		<td><button class='submit' type='submit' id='submit'>Submit</button></td>
+	</tr>
+</table>
+
+<br>
+<p>Properties of the binary word:</p>
+<table>
+	<tr>
+		<td class='c1'>Length</td>
+		<td class='c2'><div id='bs_num_bits'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Parity</td>
+		<td class='c2'><div id='bs_parity'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Complement</td>
+		<td class='c2'><div style='overflow-x:clip' id='bs_inverse'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Reversal</td>
+		<td class='c2'><div style='overflow-x:clip' id='bs_reverse'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Primitive root</td>
+		<td class='c2'><div style='overflow-x:clip' id='bs_pattern'></div></td>
+	</tr>
+</table>
+
+<br>
+<p>Properties of its binary necklace:</p>
+<table>
+	<tr>
+		<td class='c1'>Chirality</td>
+		<td class='c2'><div id='bl_symmetry'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Adjacent-XOR image</td>
+		<td class='c2'><div style='overflow-x:clip' id='bl_link'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Preimages</td>
+		<td class='c2'><div style='overflow-x:clip' id='bl_sublink'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Least rotation</td>
+		<td class='c2'><div style='overflow-x:clip' id='bl_mvrot'></div></td>
+	</tr>
+</table>
+
+<br>
+<p>Properties of the tree containing this necklace:</p>
+<table>
+	<tr>
+		<td class='c1'>Root</td>
+		<td class='c2'><div style='overflow-x:clip' id='tr_root'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Branching sequence</td>
+		<td class='c2'><div id='tr_structure'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of levels (including the root)</td>
+		<td class='c2'><div id='tr_num_levels'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of necklaces</td>
+		<td class='c2'><div id='tr_num_bl'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of binary words</td>
+		<td class='c2'><div id='tr_num_bs'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Necklace representatives</td>
+		<td class='c2'><div style='overflow-x:clip' id='tr_ls_bl'></div></td>
+		<td>
+	    	<button class='cp'
+				onclick="copyText(document.getElementById('tr_ls_bl'))">
+				<div class='svg-button'>
+					<svg class='svg-default'><use xlink:href='#default'></use></svg>
+					<svg class='svg-active active'><use xlink:href='#active'></use></svg>
+				</div>
+			</button>
+		</td>
+	</tr>
+</table>
+
+<br>
+<p>Properties of the weakly connected component containing this tree:</p>
+<table>
+	<tr>
+		<td class='c1'>Cycle length (number of attached trees)</td>
+		<td class='c2'><div id='ch_num_trees'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Cycle necklace representatives</td>
+		<td class='c2'><div style='overflow-x:clip' id='ch_ls_roots'></div></td>
+		<td>
+	    	<button class='cp'
+				onclick="copyText(document.getElementById('ch_ls_roots'))">
+				<div class='svg-button'>
+					<svg class='svg-default'><use xlink:href='#default'></use></svg>
+					<svg class='svg-active active'><use xlink:href='#active'></use></svg>
+				</div>
+			</button>
+		</td>
+	</tr>
+	<tr>
+		<td class='c1'>Least cycle representative</td>
+		<td class='c2'><div style='overflow-x:clip' id='ch_mvroo'></div></td>
+	</tr>
+</table>
+
+<br>
+<p>Properties of the word space V<sub>n</sub> and its necklace quotient:</p>
+<table>
+	<tr>
+		<td class='c1'>Number of binary words</td>
+		<td class='c2'><div id='gr_num_bs'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of necklaces</td>
+		<td class='c2'><div id='gr_num_bl'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of reflection-invariant components</td>
+		<td class='c2'><div id='gr_num_sym_chains'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Reflection-invariant component representatives</td>
+		<td class='c2'><div style='overflow-x:clip' id='gr_ls_sym_chains'></div></td>
+		<td>
+	    	<button class='cp'
+				onclick="copyText(document.getElementById('gr_ls_sym_chains'))">
+				<div class='svg-button'>
+					<svg class='svg-default'><use xlink:href='#default'></use></svg>
+					<svg class='svg-active active'><use xlink:href='#active'></use></svg>
+				</div>
+			</button>
+		</td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of reflected component pairs</td>
+		<td class='c2'><div id='gr_num_asym_chains'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Representatives of reflected component pairs</td>
+		<td class='c2'><div style='overflow-x:clip' id='gr_ls_asym_chains'></div></td>
+		<td>
+	    	<button class='cp'
+				onclick="copyText(document.getElementById('gr_ls_asym_chains'))">
+				<div class='svg-button'>
+					<svg class='svg-default'><use xlink:href='#default'></use></svg>
+					<svg class='svg-active active'><use xlink:href='#active'></use></svg>
+				</div>
+			</button>
+		</td>
+	</tr>
+	<tr>
+		<td class='c1'>Number of graph types</td>
+		<td class='c2'><div id='gr_num_graphs'></div></td>
+	</tr>
+	<tr>
+		<td class='c1'>Graph types</td>
+		<td class='c2'>
+			<div style='overflow-x:clip; white-space:nowrap' id='gr_ls_graphs'></div></td>
+		<td>
+	    	<button class='cp'
+				onclick="copyText(document.getElementById('gr_ls_graphs'))">
+				<div class='svg-button'>
+					<svg class='svg-default'><use xlink:href='#default'></use></svg>
+					<svg class='svg-active active'><use xlink:href='#active'></use></svg>
+				</div>
+			</button>
+		</td>
+	</tr>
+</table>
+
+<br>
+<p>Tessellation:</p>
+<div id='image-container'>
+	<img id='image' src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' alt='Tessellation generated from the submitted binary word'>
+</div>
+
+<br>
+<p>
+	<a href='https://github.com/symbolfigures/bitcalctess'>
+		<svg width="98" height="96" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+			<path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#fff"/>
+		</svg>
+	</a>
+</p>
+
+<br><br><br><br><br><br>
+
+</div>
+
+<script>
+	document.getElementById('submit').addEventListener('click', function() {
+		const str = document.getElementById('bitstring').value;
+		if (validate(str)) {
+			fetchCalculation();
+			fetchTessellation();
+		} else {
+			alert('Enter a binary word of length 1 to 64.');
+		}
+	});
+	function validate(str) {
+		const binaryRegex = /^[01]{1,64}$/;
+		return binaryRegex.test(str);
+	}
+	// Reversal fixes a necklace precisely when it is a rotation of the word.
+	// Legacy API field names are retained for compatibility with the service.
+	function necklaceChirality(word) {
+		const reversed = word.split('').reverse().join('');
+		return (word + word).includes(reversed) ? 'achiral' : 'chiral';
+	}
+	function necklacePreimages(word) {
+		if ([...word].filter(bit => bit === '1').length % 2) return [];
+		let first = '0';
+		for (let i = 1; i < word.length; i++) first += String(Number(first[i-1]) ^ Number(word[i]));
+		const complement = [...first].map(bit => bit === '0' ? '1' : '0').join('');
+		const least = value => [...value].map((_, i) => value.slice(i) + value.slice(0, i)).sort()[0];
+		return [...new Set([least(first), least(complement)])].sort();
+	}
+	async function fetchCalculation() {
+		const startTime = Date.now();
+		var bitstring = document.getElementById('bitstring');
+		const word = bitstring.value;
+		var body = document.body;
+		body.classList.add('loading-c');
+		var urlstub = "/api/bitloops/calc";
+		var url = urlstub.concat('?bitstring=', word);
+
+		try {
+			const response = await fetch(url);
+			console.log(response);
+			if (!response.ok) {
+				console.error('Calculation response error:', response.statusText);
+			}
+			const data = await response.json();
+
+			var bs_num_bits = document.getElementById('bs_num_bits');
+			bs_num_bits.textContent = data.bs_num_bits;
+			var bs_parity = document.getElementById('bs_parity');
+			bs_parity.textContent = data.bs_parity;
+			var bs_inverse = document.getElementById('bs_inverse');
+			bs_inverse.textContent = data.bs_inverse;
+			var bs_reverse = document.getElementById('bs_reverse');
+			bs_reverse.textContent = data.bs_reverse;
+			var bs_pattern = document.getElementById('bs_pattern');
+			bs_pattern.textContent = data.bs_pattern;
+
+			var bl_symmetry = document.getElementById('bl_symmetry');
+			bl_symmetry.textContent = necklaceChirality(word);
+			var bl_link = document.getElementById('bl_link');
+			bl_link.textContent = data.bl_link;
+			var bl_sublink = document.getElementById('bl_sublink');
+			bl_sublink.textContent = (data.necklace_preimages || necklacePreimages(word)).join(', ') || 'None';
+			var bl_mvrot = document.getElementById('bl_mvrot');
+			bl_mvrot.textContent = data.bl_mvrot;
+
+			var tr_root = document.getElementById('tr_root');
+			tr_root.textContent = data.tr_root;
+			var tr_structure = document.getElementById('tr_structure');
+			tr_structure.textContent = data.tr_structure;
+			var tr_num_levels = document.getElementById('tr_num_levels');
+			tr_num_levels.textContent = data.tree_levels ?? (Number(data.tr_num_levels) + 1);
+			var tr_num_bl = document.getElementById('tr_num_bl');
+			tr_num_bl.textContent = data.tr_num_bl;
+			var tr_num_bs = document.getElementById('tr_num_bs');
+			tr_num_bs.textContent = data.tr_num_bs;
+			var tr_ls_bl = document.getElementById('tr_ls_bl');
+			tr_ls_bl.textContent = data.tr_ls_bl;
+
+			var ch_num_trees = document.getElementById('ch_num_trees');
+			ch_num_trees.textContent = data.ch_num_trees;
+			var ch_ls_roots = document.getElementById('ch_ls_roots');
+			ch_ls_roots.textContent = data.ch_ls_roots;
+			var ch_mvroo = document.getElementById('ch_mvroo');
+			ch_mvroo.textContent = data.ch_mvroo;
+
+			var gr_num_bs = document.getElementById('gr_num_bs');
+			gr_num_bs.textContent = data.gr_num_bs;
+			var gr_num_bl = document.getElementById('gr_num_bl');
+			gr_num_bl.textContent = data.gr_num_bl;
+			var gr_num_sym_chains = document.getElementById('gr_num_sym_chains');
+			gr_num_sym_chains.textContent = data.gr_num_sym_chains;
+			var gr_ls_sym_chains = document.getElementById('gr_ls_sym_chains');
+			gr_ls_sym_chains.textContent = data.gr_ls_sym_chains;
+			var gr_num_asym_chains = document.getElementById('gr_num_asym_chains');
+			gr_num_asym_chains.textContent = data.gr_num_asym_chains;
+			var gr_ls_asym_chains = document.getElementById('gr_ls_asym_chains');
+			gr_ls_asym_chains.textContent = data.gr_ls_asym_chains;
+			var gr_num_graphs = document.getElementById('gr_num_graphs');
+			gr_num_graphs.textContent = data.gr_num_graphs;
+			var gr_ls_graphs = document.getElementById('gr_ls_graphs');
+			gr_ls_graphs.textContent = data.gr_ls_graphs;
+
+		} catch (error) {
+			console.error('Calculation network error:', error);
+			if (Date.now() - startTime > 29000) {
+				alert('Timeout. This is more likely to occur if the number of bits has a large prime factor (37+).');
+			} else {
+				alert('Unsupported browser or other error.');
+			}
+		} finally {
+			body.classList.remove('loading-c');
+		}
+	}
+	async function fetchTessellation() {
+		var bitstring = document.getElementById('bitstring');
+		const word = bitstring.value;
+		var body = document.body;
+		body.classList.add('loading-t');
+		var url = "/api/bitloops/tess";
+		url = url.concat('?bitstring=', word);
+		try {
+			const response = await fetch(url);
+			console.log(response);
+			if (!response.ok) {
+				console.error('Tessellation response error:', response.statusText);
+			}
+			const base64data = await response.text();
+			console.log(base64data);
+			document.getElementById('image').src = 'data:image/gif;base64,' + base64data;
+		} catch (error) {
+			console.error('Tessellation network error:', error);
+		} finally {
+			body.classList.remove('loading-t');
+		}
+	}
+</script>
+
+<script>
+	function copyText(element) {
+		var valueToCopy = element.textContent;
+		navigator.clipboard.writeText(valueToCopy);
+	}
+</script>
+
+<script>
+	document.querySelectorAll('.svg-button').forEach(button => {
+		button.addEventListener('mousedown', function() {
+			button.querySelector('.svg-default').classList.add('active');
+			button.querySelector('.svg-active').classList.remove('active');
+		});
+		button.addEventListener('mouseup', function() {
+			button.querySelector('.svg-default').classList.remove('active');
+			button.querySelector('.svg-active').classList.add('active');
+		});
+		button.addEventListener('mouseleave', function() {
+			button.querySelector('.svg-default').classList.remove('active');
+			button.querySelector('.svg-active').classList.add('active');
+		});
+	});
+</script>
+
+<svg width='18' height='18' xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<symbol id='default'>
+			<rect x='0' y='0' width='18' height='18' fill='#444444'/>
+			<rect x='1' y='1' width='12' height='12' stroke='#2d2b38' stroke-width='2' fill='#666666'/>
+			<rect x='5' y='5' width='12' height='12' stroke='#2d2b38' stroke-width='2' fill='#666666'/>
+		</symbol>
+		<symbol id='active'>
+			<rect x='0' y='0' width='18' height='18' fill='#444444'/>
+			<rect x='1' y='1' width='12' height='12' stroke='#2d2b38' stroke-width='2' fill='#dddd00'/>
+			<rect x='5' y='5' width='12' height='12' stroke='#2d2b38' stroke-width='2' fill='#dddd00'/>
+		</symbol>
+	</defs>
+</svg>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

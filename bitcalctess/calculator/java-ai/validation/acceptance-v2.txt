@@ -1,0 +1,18 @@
+PASS: identical Java/Python exact factor data; both validators reject 16 prime-proof/factor-data corruptions
+PASS: default n=1..1024, 512 MiB heap, 1/32 threads byte-identical CSV/certificates; all certificates independently verified
+PASS: every powerset and graph row for n=1..64 equals the user's frozen version 2.1 output
+PASS: every powerset and graph row for n=1..128 equals the user's frozen version 2.2 output
+PASS: every powerset and graph row for n=1..256 equals the user's frozen version 2.3 output
+PASS: every powerset and graph row for n=1..512 equals the user's frozen version 2.4 output
+PASS: 3,600 small relation-lattice intersections against direct integer-relation search, plus the shift-sensitive n=7 case
+PASS: wide-polynomial and prime-order boundaries, compressed n=252/254/255/504/508/510/511/1008/1016/1020/1022/1023, and exact 2^1024 word accounting
+PASS: n=1..16 exhaustive string/necklace/functional-graph oracle: 131,070 words; every graph shape and weighted count
+PASS: all completed v1 n=1..49 log totals and actual graph counts; separately labelled n=50 arithmetic forecast
+PASS: --plan writes nothing; invalid n/ranges/options fail before output/log creation
+PASS: single/range reruns preserve other n, deterministically replace entries, and append distinguishable log runs
+PASS: four concurrent publishers preserve every certificate and aggregate entry
+PASS: mixed 2.1/2.2/2.3/2.4/2 certificate import, aggregate rebuild, and selective deterministic migration
+PASS: legacy aggregate headers refused without output changes; existing chain files left untouched
+PASS: aggregate repair reconstructs exact CSV bytes from certificates after missing/stale aggregates
+PASS: verifier rejected 28 independent corruptions
+PASS: complete v2 acceptance suite (656.66 seconds)

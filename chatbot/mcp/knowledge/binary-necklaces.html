@@ -1,0 +1,1704 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Binary Necklaces</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      select {
+        background-color: #444444;
+        color: #ffffff;
+      }
+      .calligraphy {
+        font-family: jsMath;
+        line-height: 0;
+        font-style: normal;
+        font-weight: normal;
+      }
+      div {
+        font-family: CMSroman;
+      }
+      p {
+        text-indent: 20px;
+        text-align: justify;
+      }
+      p.example,
+      div.example-block {
+        margin: 18px 0 18px 40px;
+        padding: 12px 16px 14px 18px;
+        border-left: 3px solid #777777;
+        border-radius: 0 5px 5px 0;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+        text-indent: 0;
+        text-align: left;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+      }
+      p.example::before,
+      div.example-block::before {
+        content: "Example";
+        display: block;
+        margin-bottom: 5px;
+        color: #bfbfbf;
+        font-family: CMSbold, CMSroman, serif;
+        font-size: 0.72em;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      div.example-block > p {
+        margin: 0;
+        text-indent: 0;
+        text-align: left;
+      }
+      div.example-block > .math-table {
+        margin: 10px 0;
+      }
+      div.example-block > p:last-child {
+        margin-top: 8px;
+      }
+      .least-spatial-period {
+        display: inline-block;
+        padding: 0 0.18em;
+        border: 1px solid #ffffff;
+        background: transparent;
+        white-space: nowrap;
+      }
+      p.section {
+        text-align: center;
+        font-weight: bold;
+      }
+      table {
+        border-collapse: collapse;
+        margin-left: 40px;
+        text-indent: 0px;
+      }
+      .resource-table,
+      .panel-table {
+        border: 1px solid #707070;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 6px;
+        background-color: #3b3b3b;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .resource-table {
+        width: 100%;
+        margin: 24px 0 32px;
+        overflow: hidden;
+      }
+      .resource-table td {
+        padding: 12px 16px;
+        text-align: left;
+        vertical-align: top;
+        line-height: 1.4;
+      }
+      .resource-table td:first-child {
+        width: 43%;
+        font-weight: bold;
+      }
+      .resource-table tr:nth-child(2) td:first-child {
+        white-space: nowrap;
+      }
+      .resource-table td:last-child {
+        color: #e0e0e0;
+      }
+      .resource-table tr + tr td {
+        border-top: 1px solid #606060;
+      }
+      .resource-table tr:hover {
+        background-color: #484848;
+      }
+      .panel-table {
+        width: auto;
+        max-width: 100%;
+        margin: 20px 0 28px;
+        overflow: hidden;
+      }
+      .contents-table {
+        width: max-content;
+      }
+      .contents-table td {
+        padding: 0;
+      }
+      .contents-table tr:first-child td {
+        padding: 9px 14px;
+        background-color: #454545;
+        color: #e6e6e6;
+        letter-spacing: 0.04em;
+      }
+      .contents-table tr + tr td {
+        border-top: 1px solid #565656;
+      }
+      .contents-table a {
+        display: block;
+        padding: 7px 14px;
+      }
+      .contents-table tr:not(:first-child):hover,
+      .contents-table tr:not(:first-child):focus-within {
+        background-color: #484848;
+      }
+      .data-table {
+        overflow: visible;
+      }
+      .data-table td {
+        padding: 8px 12px;
+        vertical-align: top;
+      }
+      .data-table tr:first-child td {
+        background-color: #454545;
+        font-weight: bold;
+      }
+      .data-table tr + tr td {
+        border-top: 1px solid #565656;
+      }
+      .data-table tr:not(:first-child):hover,
+      .data-table tr:not(:first-child):focus-within {
+        background-color: #484848;
+      }
+      .fixed-point-table {
+        width: 100%;
+        table-layout: auto;
+      }
+      .fixed-point-table td:first-child,
+      .fixed-point-table td:nth-child(2) {
+        width: 1%;
+        white-space: nowrap;
+      }
+      .fixed-point-table td:last-child {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .correspondence-table {
+        width: auto;
+      }
+      .comparison-matrix {
+        display: block;
+        width: max-content;
+        max-width: 100%;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .comparison-matrix td {
+        padding: 6px 10px;
+        white-space: nowrap;
+      }
+      .comparison-matrix tr:first-child td {
+        background-color: #454545;
+        font-weight: bold;
+      }
+      .definition-table td {
+        padding: 7px 11px;
+        vertical-align: top;
+      }
+      .definition-table tr + tr td {
+        border-top: 1px solid #565656;
+      }
+      .set-partition-table td:first-child {
+        width: 1%;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .set-partition-table td:last-child {
+        overflow-wrap: anywhere;
+      }
+      .branching-table {
+        max-width: 100%;
+      }
+      .branching-table tr:first-child td {
+        background-color: #454545;
+        font-weight: bold;
+      }
+      .branching-table tr:not(:first-child) td:nth-child(2) {
+        padding-left: 22px;
+        text-indent: -10px;
+        overflow-wrap: anywhere;
+      }
+      .comparison-pair {
+        display: block;
+        width: max-content;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+      .comparison-pair td {
+        padding: 10px 14px;
+        white-space: nowrap;
+      }
+      .comparison-pair tr + tr td {
+        border-top: 1px solid #565656;
+      }
+      .math-table {
+        width: auto;
+        margin: 18px 0 24px 40px;
+        border-left: 2px solid #777777;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 0 4px 4px 0;
+        background-color: #3f3f3f;
+      }
+      .math-table td {
+        padding: 3px 7px;
+        white-space: nowrap;
+      }
+      .rotation-table td {
+        text-align: right;
+      }
+      .spacetime-table {
+        display: block;
+        width: max-content;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+      .spacetime-table td {
+        min-width: 1em;
+        padding: 4px 6px;
+        text-align: center;
+      }
+      .spacetime-figure {
+        text-align: center;
+        text-indent: 0;
+      }
+      .spacetime-figure img {
+        display: block;
+        margin-right: auto;
+        margin-left: auto;
+      }
+      .center {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      @font-face {
+        font-family: jsMath;
+        src: url(jsMath-cmsy10.ttf);
+      }
+      @media only screen and (max-width: 640px) {
+        p.example,
+        table {
+          margin-left: 20px;
+        }
+        p {
+          text-indent: 10px;
+        }
+        p.example,
+        div.example-block {
+          margin: 14px 0 14px 8px;
+          padding: 10px 12px 12px 14px;
+        }
+        .resource-table {
+          display: block;
+          width: auto;
+          margin: 20px 0 28px;
+        }
+        .resource-table tbody,
+        .resource-table tr,
+        .resource-table td {
+          display: block;
+          width: auto;
+        }
+        .resource-table tr {
+          padding: 10px 14px;
+        }
+        .resource-table tr + tr {
+          border-top: 1px solid #606060;
+        }
+        .resource-table td,
+        .resource-table tr + tr td {
+          padding: 2px 0;
+          border-top: 0;
+        }
+        .resource-table td:first-child {
+          width: auto;
+          padding-bottom: 4px;
+        }
+        .panel-table {
+          margin: 16px 0 24px;
+          max-width: 100%;
+        }
+        .contents-table {
+          width: 100%;
+        }
+        .math-table {
+          margin: 14px 0 20px 8px;
+          max-width: calc(100% - 8px);
+        }
+        .data-table tbody,
+        .data-table tr,
+        .data-table td {
+          display: revert;
+        }
+        .comparison-matrix,
+        .comparison-pair {
+          margin-left: 0;
+        }
+        .spacetime-table td {
+          padding: 3px 4px;
+        }
+      }
+    </style>
+    <script>
+      function goToPowPdf() {
+        var selectedFile = document.getElementById("powpdf").value;
+        if (selectedFile) {
+          window.location.href = selectedFile;
+        }
+      }
+      function goToPowCsv() {
+        var selectedFile = document.getElementById("powcsv").value;
+        if (selectedFile) {
+          window.location.href = selectedFile;
+        }
+      }
+      function goToTesPdf() {
+        var selectedFile = document.getElementById("tespdf").value;
+        if (selectedFile) {
+          window.location.href = selectedFile;
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="margin">
+      <a href="index.html">&#8592;</a>
+      <p id="title"> Binary Necklaces </p>
+
+      <p>
+        A
+        <a href="https://en.wikipedia.org/wiki/Necklace_%28combinatorics%29">binary necklace</a> is
+        a rotation class of binary words: moving the starting position around the circle does not
+        change the necklace. The binary words of length <i>n</i> represent the subsets of a
+        cyclically ordered <i>n</i>-element set. Rotation classes partition these words, and the
+        adjacent-XOR map defined below partitions the necklaces into connected components of a
+        functional graph. Components can then be grouped by directed-graph isomorphism type. Every
+        component contains a cycle, which generates a periodic space-time diagram that can be
+        rendered geometrically as a tessellation.
+      </p>
+
+      <p> These elements are explained in detail below. Examples are indicated by indentation. </p>
+
+      <table class="resource-table">
+        <tr>
+          <td><a href="binary-necklaces/bitcalctess.html">Calculator and Tessellator</a></td>
+          <td
+            >Calculates certain properties of a given binary word and generates a tessellation.</td
+          >
+        </tr>
+        <tr>
+          <td
+            >Properties of Bitloops (<a href="binary-necklaces/archive/bitloops-zine.pdf"
+              >digital</a
+            >
+            | <a href="binary-necklaces/archive/bitloops-zine-book.pdf">print</a>)</td
+          >
+          <td>First interpretation from 2020.</td>
+        </tr>
+        <tr>
+          <td>Bitloops (<a href="binary-necklaces/archive/bitloops.html">html</a>)</td>
+          <td>Last revision from 2025 that was not AI-assisted.</td>
+        </tr>
+      </table>
+
+      <table class="panel-table contents-table">
+        <tr><td>Contents:</td></tr>
+        <tr
+          ><td><a href="#Bitloops">Binary Necklaces</a></td></tr
+        >
+        <tr
+          ><td><a href="#The Link">Adjacent XOR</a></td></tr
+        >
+        <tr
+          ><td><a href="#Patterns">Primitive Roots and Spatial Periods</a></td></tr
+        >
+        <tr
+          ><td><a href="#Power Sets">Power Sets</a></td></tr
+        >
+        <tr
+          ><td><a href="#Chains">Dynamical Components</a></td></tr
+        >
+        <tr
+          ><td><a href="#Symmetry">Symmetry</a></td></tr
+        >
+        <tr
+          ><td><a href="#Graphs">Graphs</a></td></tr
+        >
+        <tr
+          ><td><a href="#Tessellations">Space-Time Diagrams and Tessellations</a></td></tr
+        >
+        <tr
+          ><td><a href="#Catalogue">Catalogue</a></td></tr
+        >
+        <tr
+          ><td><a href="#Appendix">Appendix</a></td></tr
+        >
+      </table>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Bitloops"></div>
+      <br />
+      <p class="section"> Binary Necklaces </p>
+
+      <p>
+        A bit is either zero or one. A
+        <a href="https://en.wikipedia.org/wiki/Combinatorics_on_words">binary word</a> is a finite
+        sequence of bits. The bits are written like letters in a word. The letter <i>n</i> denotes
+        the length of the word, which here is always a positive integer.
+      </p>
+
+      <p class="example"> 00001011 and 01010101 are binary words, each with <i>n</i> = 8 bits. </p>
+
+      <p>
+        The positions in a binary word are ordered and can be indexed. Let <i>J</i> = {<i>i</i
+        ><sub>1</sub>, <i>i</i><sub>2</sub>, ..., <i>i</i><sub><i>n</i></sub
+        >} be the set of positions. A word is a function <i>w</i>: <i>J</i> &rarr; {0, 1}, written
+        <i>w</i>(<i>i</i><sub>1</sub>) <i>w</i>(<i>i</i><sub>2</sub>) ... <i>w</i>(<i>i</i
+        ><sub><i>n</i></sub
+        >).
+      </p>
+
+      <p class="example">
+        Given the binary word 01, <i>w</i>(<i>i</i><sub>1</sub>) = 0 and <i>w</i>(<i>i</i
+        ><sub>2</sub>) = 1.
+      </p>
+
+      <p>
+        A binary necklace has <i>n</i> cyclically ordered bits and no distinguished starting
+        position. For comparison, the seasons have a
+        <a href="https://en.wikipedia.org/wiki/Cyclic_order">cyclic order</a> without a
+        distinguished first season. A necklace can be drawn as a ring or represented by a binary
+        word, with the understanding that rotating the word gives the same necklace. Reflection is
+        not identified with rotation. Binary words are written as sequences of bits without
+        enclosing punctuation. A necklace is specified by a representative word; the surrounding
+        text distinguishes the word from its rotation class.
+      </p>
+
+      <p class="example">
+        100001 is a binary word. It represents a necklace whose other representatives are the
+        rotations of that word.
+      </p>
+
+      <p> Potentially multiple binary words may represent the same necklace. </p>
+
+      <p class="example">
+        The binary words 1000, 0100, 0010 and 0001 all represent the same necklace.
+      </p>
+
+      <p>
+        A rotation class, or orbit under cyclic rotation, is the set of all words representing one
+        binary necklace. The necklace is this entire equivalence class. Words in the same class are
+        rotations of each other.
+      </p>
+
+      <p class="example">
+        The necklace represented by 100 has the rotation class {100, 010, 001}.
+      </p>
+
+      <p class="example">
+        The necklace represented by 1010 has the rotation class {1010, 0101}. The words 1010 and
+        0101 are rotations of each other.
+      </p>
+
+      <p class="example"> The necklace 11111 has a rotation class with only one word. </p>
+
+      <p>
+        A <a href="https://en.wikipedia.org/wiki/Permutation">permutation</a> of a binary word
+        alters the indices of its bits. Let <i>&#945;</i> be a permutation that follows this rule:
+      </p>
+
+      <p class="example">
+        <i>&#945;</i>(<i>i</i><sub>1</sub>) = <i>i</i><sub>2</sub>, &nbsp; <i>&#945;</i>(<i>i</i
+        ><sub>2</sub>) = <i>i</i><sub>3</sub>, &nbsp; ..., &nbsp; <i>&#945;</i>(<i>i</i
+        ><sub>n-1</sub>) = <i>i</i><sub>n</sub>, &nbsp; <i>&#945;</i>(<i>i</i><sub>n</sub>) =
+        <i>i</i><sub>1</sub>.
+      </p>
+
+      <p>
+        <i>&#945;</i> is a
+        <a href="https://en.wikipedia.org/wiki/Cyclic_permutation">cycle (or <i>n</i>-cycle)</a>,
+        which rotates the indices by one position. <i>&#945;</i><sup><i>m</i></sup> rotates each
+        index by <i>m</i> positions. <i>&#945;</i><sup>1</sup> = <i>&#945;</i>.
+      </p>
+
+      <table class="math-table rotation-table">
+        <tr
+          ><td align="right"><i>&#945;</i>(1101) = 1110</td></tr
+        >
+        <tr
+          ><td align="right"><i>&#945;</i>(1110) = 0111</td></tr
+        >
+        <tr
+          ><td align="right"><i>&#945;</i><sup>2</sup>(0111) = 1101</td></tr
+        >
+        <tr
+          ><td align="right"><i>&#945;</i><sup>-1</sup>(1101) = 1011</td></tr
+        >
+      </table>
+
+      <p>
+        Two binary words <i>a</i> and <i>b</i> are related by a one-position rotation if
+        <i>&#945;</i>(<i>a</i>) = <i>b</i> or <i>&#945;</i>(<i>b</i>) = <i>a</i>.
+      </p>
+
+      <p class="example"> 0100 and 0010 differ by a one-position rotation. </p>
+
+      <p class="example"> 1000 and 0010 do not differ by a one-position rotation. </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="The Link"></div>
+      <br />
+      <p class="section"> Adjacent XOR </p>
+
+      <p>
+        A unary bitwise operation takes one binary word and produces another. The unary operation
+        bitwise NOT takes one binary word and changes each zero to a one, and each one to a zero.
+        The resulting binary word is the complement of the original, and vice versa.
+      </p>
+
+      <table class="math-table calculation-table">
+        <tr>
+          <td></td>
+          <td>NOT</td>
+          <td>0011</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td align="right">=</td>
+          <td>1100</td>
+        </tr>
+      </table>
+
+      <p class="example"> 0011 is the complement of 1100, and 1100 is the complement of 0011. </p>
+
+      <p>
+        Necklaces can also be complements of each other. If so, then members of their respective
+        rotation classes form complement pairs.
+      </p>
+
+      <table class="panel-table comparison-matrix complement-table">
+        <tr>
+          <td>Necklace representative</td>
+          <td colspan="3">Rotation class</td>
+        </tr>
+        <tr>
+          <td style="width: 100px">100</td>
+          <td style="width: 50px">100</td>
+          <td style="width: 50px">010</td>
+          <td style="width: 50px">001</td>
+        </tr>
+        <tr>
+          <td>011</td>
+          <td>011</td>
+          <td>101</td>
+          <td>110</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>&#8593;</td>
+          <td>&#8593;</td>
+          <td>&#8593;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td colspan="3">complement pairs</td>
+        </tr>
+      </table>
+
+      <p>
+        A binary bitwise operation takes two binary words and produces another.
+        <a href="https://en.wikipedia.org/wiki/Bitwise_operation#XOR">Bitwise XOR</a> does this by
+        adding bits, where 0 + 0 = 0, 0 + 1 = 1, and 1 + 1 = 0. This kind of addition is called
+        <a href="https://en.wikipedia.org/wiki/Modular_arithmetic">addition modulo 2</a>.
+      </p>
+
+      <table class="math-table calculation-table">
+        <tr>
+          <td></td>
+          <td></td>
+          <td>0101</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>XOR</td>
+          <td>0011</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td align="right">=</td>
+          <td>0110</td>
+        </tr>
+      </table>
+
+      <p>
+        The adjacent-XOR map, also called the
+        <a href="https://en.wikipedia.org/wiki/Ducci_sequence">binary Ducci map</a>, sends a word
+        <i>w</i> to <i>D</i>(<i>w</i>) = <i>w</i> XOR <i>&#945;</i>(<i>w</i>). Each output bit is
+        the sum modulo two of neighboring input bits. Rotation commutes with this map, so rotating
+        <i>w</i> only rotates its image. The map therefore induces a well-defined map on necklaces,
+        also denoted <i>D</i>. Given a necklace <i>P</i>, take a representative and its one-position
+        rotation and apply XOR. Let <i>Q</i> be the necklace represented by the resulting word. Then
+        <i>Q</i> = <i>D</i>(<i>P</i>) is the image of <i>P</i>.
+      </p>
+
+      <div class="example-block">
+        <p>
+          Let <i>P</i> be the necklace represented by 1000, and take two of its representative words
+          <i>a</i> = 1000 and <i>b</i> = 0100.
+        </p>
+
+        <table class="math-table calculation-table">
+          <tr>
+            <td></td>
+            <td></td>
+            <td>1000</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td align="right">XOR</td>
+            <td>0100</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td align="right">=</td>
+            <td>1100</td>
+          </tr>
+        </table>
+
+        <p> Then the image <i>D</i>(<i>P</i>) is the necklace represented by 1100. </p>
+      </div>
+
+      <p>
+        A preimage of <i>Q</i> is a necklace <i>P</i> with <i>D</i>(<i>P</i>) = <i>Q</i>. Taking
+        preimages is a relation, not an inverse function: a necklace can have no preimages, one
+        preimage, or two distinct preimages.
+      </p>
+
+      <p>
+        Successive images of a necklace can be displayed using representative words, with each arrow
+        indicating one application of the induced map.
+      </p>
+
+      <p class="example">
+        0001 &rarr; 0011 &rarr; 0101 &rarr; 1111 &rarr; 0000 &rarr; 0000 &rarr; ...
+      </p>
+
+      <p>
+        A necklace has a preimage if and only if its
+        <a href="https://en.wikipedia.org/wiki/Hamming_weight">Hamming weight</a>, the number of
+        ones in a representative, is even.
+      </p>
+
+      <p class="example">
+        The necklace represented by 11 has a single necklace preimage, represented by 01. The
+        necklace represented by 01 has no preimage.
+      </p>
+
+      <p> A necklace and its complement generate the same image. </p>
+
+      <p class="example"> 11110 is the image of 01010 and 10101. </p>
+
+      <p>
+        A necklace is self-complementary if complementing every bit gives a rotation of the original
+        word. Equivalently, its rotation class is closed under bitwise complementation.
+      </p>
+
+      <p class="example">
+        The necklace represented by 1100 is self-complementary. Its rotation class is {1100, 1001,
+        0011, 0110}.
+      </p>
+
+      <p>
+        The shortest repeating representative of a self-complementary necklace has even length and
+        can be split into complementary halves. The full displayed word need not have complementary
+        halves if that shortest block is repeated an even number of times.
+      </p>
+
+      <p class="example">
+        The necklace represented by 1101100100 is self-complementary. The words 11011 and 00100 are
+        complements.
+      </p>
+
+      <p>
+        Some necklaces are
+        <a href="https://en.wikipedia.org/wiki/Fixed_point_%28mathematics%29">fixed points</a> of
+        the induced adjacent-XOR map: their images are rotations of themselves. Six examples are
+        listed below with the tessellations derived from their periodic space-time diagrams.
+        Reversing or repeating any of these representatives also gives a fixed necklace.
+      </p>
+
+      <table class="panel-table data-table fixed-point-table">
+        <tr>
+          <td style="width: 50px"><i>n</i></td>
+          <td style="width: 50px">tiling</td>
+          <td>necklace representative</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-1.png">png</a></td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-3.png">png</a></td>
+          <td>011</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-7.png">png</a></td>
+          <td>0011101</td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-15.png">png</a></td>
+          <td>000111101011001</td>
+        </tr>
+        <tr>
+          <td>21</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-21.png">png</a></td>
+          <td>000011111010100110001</td>
+        </tr>
+        <tr>
+          <td>63</td>
+          <td><a href="binary-necklaces/figures/fixed-necklace-63.png">png</a></td>
+          <td>000001000011000101001111010001110010010110111011001101010111111</td>
+        </tr>
+      </table>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Patterns"></div>
+      <br />
+      <p class="section"> Primitive Roots and Spatial Periods </p>
+
+      <p>
+        A binary word can be written uniquely as <i>u</i><sup><i>k</i></sup
+        >, meaning <i>k</i> concatenated copies of a shortest nonempty word <i>u</i>. This word
+        <i>u</i> is its primitive root; it is not itself a proper power. For a necklace, the
+        corresponding primitive necklace is the rotation class of <i>u</i>. Its length <i>d</i> is
+        the least spatial period, and <i>d</i> divides <i>n</i>. Every necklace has exactly one such
+        primitive necklace.
+      </p>
+
+      <p class="example">
+        0001 is the primitive root of the word 0001000100010001. The block 00010001 also repeats,
+        but it is not primitive.
+      </p>
+
+      <p class="example">
+        1100 is not the primitive root of 11001100110011, because it does not repeat a whole number
+        of times to form that word.
+      </p>
+
+      <p class="example"> 000111011 is its own primitive root. </p>
+
+      <p>
+        The primitive necklace can be represented by any rotation of its primitive root. When
+        displaying a word and its root together, matching their starting positions makes the
+        repetition easier to see.
+      </p>
+
+      <p class="example">
+        The word 001001 has primitive root 001. The words 010 and 100 represent the same primitive
+        necklace, although they are not the literal primitive root of that displayed word. For
+        example, 010 is the primitive root of 010010. The distinct words 001001 and 010010 represent
+        the same necklace.
+      </p>
+
+      <p>
+        Another way to display a necklace is to repeat a representative indefinitely in both
+        directions. The resulting
+        <a href="https://en.wikipedia.org/wiki/Periodic_sequence">periodic binary sequence</a> has a
+        least positive spatial period; choosing a different starting position changes its primitive
+        word by a rotation.
+      </p>
+
+      <p class="example">
+        ... 0 1 1 0 1 1 1 1 <span class="least-spatial-period">0 1 1 0 1 1 1 1</span> 0 1 1 0 1 1 1
+        1 0 1 1 0 1 1 1 1 0 1 1 0 1 1 1 ...
+      </p>
+
+      <p class="example">
+        ... 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1
+        <span class="least-spatial-period">0 1</span> 0 1 0 1 0 1 0 1 0 1 0 ...
+      </p>
+
+      <p class="example">
+        ... 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 <span class="least-spatial-period">0</span> 0 0 0 0 0
+        0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ...
+      </p>
+
+      <p>
+        The least spatial period is defined by the entire periodic sequence. A finite excerpt may
+        not determine it uniquely, even if a short block appears twice. Repeating a fixed primitive
+        necklace produces necklaces of arbitrarily large lengths that are multiples of its period.
+      </p>
+
+      <p>
+        For ease of reference, a word or necklace may be represented by its primitive root when the
+        ambient length <i>n</i> is specified or understood. The root is repeated to recover that
+        length.
+      </p>
+
+      <p class="example">
+        At width eight, successive necklace images can be displayed using primitive
+        representatives:<br />00001111 &rarr; 0001 &rarr; 0011 &rarr; 01 &rarr; 1 &rarr; 0.
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Power Sets"></div>
+      <br />
+      <p class="section"> Power Sets </p>
+
+      <p>
+        The notation <span class="calligraphy">P</span>(<i>S</i>) denotes the
+        <a href="https://en.wikipedia.org/wiki/Power_set">power set</a> of a set <i>S</i>: the set
+        of all subsets of <i>S</i>. Calligraphic lettering is customary for a family of sets.
+      </p>
+
+      <p class="example"> Let <i>S</i> = {<i>x</i>, <i>y</i>} for the next four examples. </p>
+
+      <p class="example">
+        <span class="calligraphy">P</span>(<i>S</i>) = {&#8709;, {<i>x</i>}, {<i>y</i>}, {<i>x</i>,
+        <i>y</i>}}, where &#8709; denotes the empty set.
+      </p>
+
+      <p>
+        Give the elements of <i>S</i> a cyclic ordering and choose a
+        <a href="https://en.wikipedia.org/wiki/Bijection">bijection</a> <i>f</i>: <i>S</i> &rarr;
+        <i>J</i> assigning each element a position. This ordering supplies the rotation used
+        throughout the construction.
+      </p>
+
+      <p class="example">
+        <i>f</i>(<i>x</i>) = <i>i</i><sub>1</sub>, <i>f</i>(<i>y</i>) = <i>i</i><sub>2</sub>
+      </p>
+
+      <p>
+        The bits of a binary word are also indexed by <i>J</i>, so each element in <i>S</i> is
+        assigned a position in a binary word.
+      </p>
+
+      <p class="example">
+        The first position, <i>i</i><sub>1</sub>, corresponds to <i>x</i>; the second, <i>i</i
+        ><sub>2</sub>, corresponds to <i>y</i>.
+      </p>
+
+      <p>
+        By this correspondence, a binary word is the
+        <a href="https://en.wikipedia.org/wiki/Indicator_function">characteristic vector</a> of a
+        subset of <i>S</i>: a bit is one exactly when its corresponding element belongs to the
+        subset. Write <i>V</i><sub><i>n</i></sub> = {0, 1}<sup><i>n</i></sup> for the set of
+        length-<i>n</i> words. The correspondence is a bijection between
+        <span class="calligraphy">P</span>(<i>S</i>) and <i>V</i><sub><i>n</i></sub
+        >, so both have 2<sup><i>n</i></sup> elements.
+      </p>
+
+      <table class="panel-table data-table correspondence-table">
+        <tr style="border-bottom: 1px solid">
+          <td style="width: 100px"><span class="calligraphy">P</span>(<i>S</i>)</td>
+          <td><i>V</i><sub>2</sub></td>
+        </tr>
+        <tr>
+          <td>&#8709;</td>
+          <td>00</td>
+        </tr>
+        <tr>
+          <td>{<i>x</i>}</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>{<i>y</i>}</td>
+          <td>01</td>
+        </tr>
+        <tr>
+          <td>{<i>x</i>, <i>y</i>}</td>
+          <td>11</td>
+        </tr>
+      </table>
+
+      <p class="example">
+        <i>V</i><sub>1</sub> = {0, 1} represents the power set of a one-element set, the smallest
+        width considered here.
+      </p>
+
+      <p>
+        <i>V</i><sub><i>n</i></sub> can be partitioned in a few ways. It can be partitioned by
+        complement pairs of binary words, because every binary word has one and only one complement,
+        which is not itself. <i>V</i><sub><i>n</i></sub> can be partitioned by rotation classes,
+        because each binary word belongs to one and only one rotation class. <i>V</i
+        ><sub><i>n</i></sub> can also be partitioned according to the length of each binary
+        word&#8217;s primitive root.
+      </p>
+
+      <p>
+        For <i>n</i> &gt; 1, another partition of <i>V</i><sub><i>n</i></sub> separates the constant
+        words, the nonconstant proper powers, and the primitive words. Let <i>p</i> be the primitive
+        root of a word <i>x</i>. Put <i>x</i> in <i>A</i> if length(<i>p</i>) = 1, in <i>C</i> if
+        length(<i>p</i>) = <i>n</i>, and in <i>B</i> otherwise.
+      </p>
+
+      <table class="panel-table definition-table set-partition-table">
+        <tr>
+          <td style="width: 50px; text-align: right"><i>V</i><sub>4</sub> =</td>
+          <td
+            >{0000, 1111, 0101, 1010, 0011, 0110, 1100, 1001, <br />0001, 0010, 0100, 1000, 1110,
+            1101, 1011, 0111}</td
+          >
+        </tr>
+        <tr>
+          <td style="text-align: right"><i>A</i> =</td>
+          <td>{0000, 1111}</td>
+        </tr>
+        <tr>
+          <td style="text-align: right"><i>B</i> =</td>
+          <td>{0101, 1010}</td>
+        </tr>
+        <tr>
+          <td style="text-align: right"><i>C</i> =</td>
+          <td>{0011, 0110, 1100, 1001, 0001, 0010, 0100, 1000, 1110, 1101, 1011, 0111}</td>
+        </tr>
+      </table>
+
+      <p class="example">
+        For 0101, <i>p</i> = 01, and for 1010, <i>p</i> = 10. In either case, length(<i>p</i>)
+        equals two. Two is greater than one and less than <i>n</i>, so 0101, 1010 &#8712; <i>B</i>.
+      </p>
+
+      <p class="example">
+        <i>A</i> = {0, 1} for any <i>n</i>, where binary words are represented by their respective
+        primitive roots.
+      </p>
+
+      <p>
+        This partition gives the usual necklace-counting proof of the base-two case of
+        <a href="https://en.wikipedia.org/wiki/Fermat%27s_little_theorem"
+          >Fermat&#39;s little theorem</a
+        >:
+      </p>
+
+      <p>
+        Theorem. For any prime number <i>n</i>, 2<sup><i>n</i></sup> - 2 is divisible by <i>n</i>.
+      </p>
+
+      <p>
+        Proof. The set <i>V</i><sub><i>n</i></sub> has 2<sup><i>n</i></sup> elements. Since
+        <i>n</i> is prime and <i>n</i> must be divisible by the number of bits in <i>p</i>,
+        length(<i>p</i>) = 1 or <i>n</i>, so <i>B</i> is empty. <i>A</i> has two elements, so
+        <i>C</i> has 2<sup><i>n</i></sup> - 2 elements. Every binary word in <i>C</i> belongs to a
+        rotation class with <i>n</i> binary words, so the number of binary words in <i>C</i> is
+        divisible by <i>n</i>. Therefore 2<sup><i>n</i></sup> - 2 is divisible by <i>n</i>. &#8718;
+      </p>
+
+      <p>
+        Let <i>A</i> = {<i>a</i>, <i>b</i>, <i>c</i>, <i>d</i>} be a subset of <i>V</i
+        ><sub><i>n</i></sub
+        >, equipped with the operation bitwise XOR. Let <i>a</i> be the binary word with all zeros
+        and <i>b</i> be the binary word with all ones. Let <i>c</i> and <i>d</i> be any other pair
+        of complementary binary words. Then <i>A</i> is a
+        <a href="https://en.wikipedia.org/wiki/Klein_four-group">Klein four-group</a>, where
+        <i>a</i> is the identity element.
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Chains"></div>
+      <br />
+      <p class="section"> Dynamical Components </p>
+
+      <p>
+        The <a href="https://en.wikipedia.org/wiki/Functional_graph">functional digraph</a> of the
+        induced map has one vertex for each necklace and one directed edge <i>P</i> &rarr;
+        <i>D</i>(<i>P</i>). A component means a
+        <a href="https://en.wikipedia.org/wiki/Connectivity_%28graph_theory%29"
+          >weakly connected component</a
+        >: connectivity is tested after forgetting edge directions. It contains the image of each of
+        its vertices and every preimage of each vertex. Starting from any necklace, repeatedly
+        taking images and all preimages recovers its entire component.
+      </p>
+
+      <img src="binary-necklaces/figures/C1-1-1.png" style="width: 100%" />
+      <br />
+
+      <p class="example">
+        At width one, <i>D</i>(0) = 0 and <i>D</i>(1) = 0. The preimages of 0 are 0 and 1, while 1
+        has no preimage. These two necklaces form the width-one component.
+      </p>
+
+      <p>
+        The set of necklaces is the
+        <a href="https://en.wikipedia.org/wiki/Equivalence_class#Quotient_set">quotient set</a>
+        <i>V</i><sub><i>n</i></sub
+        >/&lang;<i>&#945;</i>&rang;. It is distinct from <i>V</i><sub><i>n</i></sub
+        >: each of its elements represents a whole rotation class of words.
+      </p>
+
+      <p>
+        Grouping necklaces by their components gives another partition of the words in <i>V</i
+        ><sub><i>n</i></sub
+        >: take the union of the rotation classes in each component. Every word belongs to one
+        necklace and every necklace to one component. Thus the partition into rotation classes
+        refines the partition into these component basins.
+      </p>
+
+      <p class="example">
+        <i>V</i><sub>3</sub> has eight binary words, which are partitioned into four rotation
+        classes, which are partitioned into two components.
+      </p>
+
+      <p>
+        Every component of a finite functional digraph contains exactly one
+        <a href="https://en.wikipedia.org/wiki/Cycle_%28graph_theory%29">directed cycle</a>, with
+        <a href="https://en.wikipedia.org/wiki/Tree_%28graph_theory%29#Rooted_tree">rooted trees</a>
+        feeding into it. Here the cycle is a sequence of necklaces whose successive images follow
+        the sequence. The image of the final necklace is the first; a fixed necklace is a cycle of
+        length one.
+      </p>
+
+      <p class="example">
+        The first cycle with multiple necklaces has representatives 00011 &rarr; 10010 &rarr; 11110
+        &rarr; 00011.
+      </p>
+
+      <p class="example">
+        The second cycle with multiple necklaces has representatives 000101 &rarr; 111100 &rarr;
+        000101.
+      </p>
+
+      <p>
+        Each cycle vertex is the root of an incoming rooted tree, whose edges point toward the
+        cycle. Its two necklace preimages are its predecessor on the cycle and one transient
+        predecessor. The cycle edge is not counted as a tree edge. Vertices with no preimages are
+        the leaves.
+      </p>
+
+      <p style="text-align: center">
+        <img src="binary-necklaces/figures/C4-1-1.png" style="width: 100%" />
+        <br />
+      </p>
+
+      <p class="example">
+        <i>V</i><sub>4</sub> is partitioned by a single component. The cycle of that component has a
+        single root, so the component has only one tree. Using primitive representatives, one path
+        from a leaf to the root is 0001 &rarr; 0011 &rarr; 01 &rarr; 1 &rarr; 0; reading backward
+        gives successive preimages. 0011 also has the preimage 1110. 0001 and 1110 are the two
+        leaves of the tree.
+      </p>
+
+      <p> Trees vary in how many levels of successive preimages they have. </p>
+
+      <p class="example">
+        The component that comprises <i>V</i><sub>8</sub> has nine levels of preimages, including
+        the root.
+      </p>
+
+      <p class="example">
+        Restrict <i>n</i> to only powers of two. The component that comprises <i>V</i
+        ><sub><i>n</i></sub> has <i>n</i> + 1 levels of preimages, including the root.
+      </p>
+
+      <p>
+        These incoming trees are level-regular: vertices at the same depth have the same number of
+        children. Their branching is related to whether the preimage necklaces coincide under
+        complementation. A branching sequence records the number of preimages at successive depths,
+        with the convention at the cycle root specified below.
+      </p>
+
+      <p>
+        Write the branching sequence as (<i>b</i><sub>0</sub>, <i>b</i><sub>1</sub>, ..., <i>b</i
+        ><sub><i>h</i></sub
+        >), where <i>h</i> is the tree depth and the root has depth zero. For internal depths,
+        <i>b</i><sub><i>j</i></sub> counts the children of a vertex at depth <i>j</i>. By
+        convention, <i>b</i><sub>0</sub> = 2 counts both the incoming cycle edge and the one
+        incoming tree edge. At the leaves, <i>b</i><sub><i>h</i></sub> = 0. This sequence is a local
+        catalogue encoding of the level-regular tree, with the cycle edge included only at the root.
+      </p>
+
+      <table class="panel-table definition-table branching-table">
+        <tr>
+          <td colspan="2">The branching sequence of the unique tree in ...</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>... <i>V</i><sub>1</sub> is (2, 0).</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>... <i>V</i><sub>2</sub> is (2, 1, 0).</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>... <i>V</i><sub>4</sub> is (2, 1, 1, 2, 0).</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>... <i>V</i><sub>8</sub> is (2, 1, 1, 2, 1, 2, 2, 2, 0).</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>... <i>V</i><sub>16</sub> is (2, 1, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 0).</td>
+        </tr>
+      </table>
+
+      <p>
+        For shorthand, the branching sequence may be written as a word over the alphabet {0, 1, 2}.
+      </p>
+
+      <p class="example">
+        The branching sequence of the unique tree at width 16 is 21121222122222220.
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Symmetry"></div>
+      <br />
+      <p class="section"> Symmetry </p>
+
+      <p>
+        A binary word is a <a href="https://en.wikipedia.org/wiki/Palindrome">palindrome</a> if
+        reversing the order of its bits leaves it unchanged. Otherwise it is non-palindromic. Two
+        distinct words form a reversal pair when each is the reverse of the other.
+      </p>
+
+      <p class="example">
+        100010 and 010001 are non-palindromic and form a reversal pair. The word 100001 is a
+        palindrome.
+      </p>
+
+      <p>
+        A necklace is
+        <a href="https://en.wikipedia.org/wiki/Chirality_%28mathematics%29">achiral</a> if reversing
+        a representative gives a rotation of that representative. Its rotation class is then closed
+        under reversal. A palindromic representative is sufficient, but is not necessary at even
+        length: the necklace represented by 01 is achiral although neither word 01 nor 10 is a
+        palindrome.
+      </p>
+
+      <p class="example">
+        The necklace represented by 11010 is achiral. Its rotation class contains one palindrome and
+        two reversal pairs: {11010, 01101, 10110, 01011, 10101}.
+      </p>
+
+      <p class="example">
+        Every necklace of length five is achiral. A set of primitive representatives is {0, 1,
+        00001, 11110, 11100, 00011, 01101, 10010}.
+      </p>
+
+      <p>
+        A necklace is chiral if its reversal is a distinct necklace. A chiral necklace <i>X</i> has
+        a reflected partner <i>Y</i>, whose words are the reversals of the words in <i>X</i>.
+        Identifying rotation and reflection together would instead give a
+        <a href="https://en.wikipedia.org/wiki/Necklace_%28combinatorics%29#Bracelets"
+          >binary bracelet</a
+        >; necklaces here identify rotations only.
+      </p>
+
+      <p class="example">
+        The rotation classes of the words 1001110 and 0111001 are displayed below with reverse pairs
+        aligned vertically.
+      </p>
+
+      <table class="panel-table comparison-pair reversal-table">
+        <tr>
+          <td> {1001110, 0011101, 0111010, 1110100, 1101001, 1010011, 0100111} </td>
+        </tr>
+        <tr>
+          <td> {0111001, 1011100, 0101110, 0010111, 1001011, 1100101, 1110010} </td>
+        </tr>
+      </table>
+
+      <p>
+        Reversal induces an
+        <a href="https://en.wikipedia.org/wiki/Involution_%28mathematics%29">involution</a> on the
+        necklace functional graph and sends components to components. A component is
+        reflection-invariant if reversal preserves its vertex set; otherwise it has a distinct
+        reflected partner. A reflection-invariant component can contain chiral necklaces, so its
+        symmetry is not determined by requiring every vertex to be achiral. A reflected pair
+        consists of two components, although the historical catalogue may display the pair in one
+        entry.
+      </p>
+
+      <p class="example">
+        The necklaces represented by 0001101 and 1110010 form one component at width seven.
+        Reversing them gives its distinct reflected partner. The historical catalogue groups this
+        pair into its first entry marked &ldquo;a&rdquo;.
+      </p>
+
+      <p>
+        Geometrically, a necklace is achiral exactly when its circular arrangement has a reflection
+        axis. Depending on the length and arrangement, the axis may pass through positions or
+        between them.
+      </p>
+
+      <p style="text-align: center">
+        <img src="binary-necklaces/figures/symmetry.png" style="width: 75%" />
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Graphs"></div>
+      <br />
+      <p class="section"> Graphs </p>
+
+      <p>
+        A component is a directed graph whose vertices are necklaces and whose edges point from each
+        necklace to its image under adjacent XOR. Its directed cycle is a subgraph. The order of a
+        graph is its number of vertices. Two components are
+        <a href="https://en.wikipedia.org/wiki/Graph_isomorphism">isomorphic</a> if a bijection
+        between their vertices preserves the directed edges. For the level-regular components here,
+        the cycle length and branching sequence determine the directed-graph isomorphism type.
+      </p>
+
+      <p style="text-align: center">
+        <img src="binary-necklaces/figures/G11-31.png" style="width: 100%" />
+      </p>
+
+      <p class="example">
+        Three components in <i>V</i><sub>11</sub> are isomorphic. Their graph has cycle length 31
+        and branching sequence (2, 0).
+      </p>
+
+      <p class="example">
+        Let <i>x</i> and <i>y</i> be nonnegative integers with <i>x</i> &lt; <i>y</i>. Repetition
+        embeds the unique component at width 2<sup><i>x</i></sup> as a subgraph of the unique
+        component at width 2<sup><i>y</i></sup
+        >.
+      </p>
+
+      <p class="example">
+        There are 2,097,152 binary words of length 21. They form 99,880 rotation classes. The
+        historical catalogue groups their components into 418 entries: 20 reflection-invariant
+        components and 398 reflected pairs, giving 816 components in total. These components fall
+        into six directed-graph isomorphism types. All six have branching sequence (2, 0), and their
+        cycle lengths are 1, 3, 7, 9, 21, and 63.
+      </p>
+
+      <p> Isomorphic components need not have the same behavior under reflection. </p>
+
+      <p style="text-align: center">
+        <img src="binary-necklaces/figures/G9-7.png" style="width: 100%" />
+      </p>
+
+      <p class="example">
+        The component containing the necklace represented by 000000001 is reflection-invariant,
+        while the component containing the necklace represented by 000001011 has a distinct
+        reflected partner. Both have cycle length 7 and branching sequence (2, 0).
+      </p>
+
+      <p style="text-align: center">
+        <img src="binary-necklaces/figures/G10-6.png" style="width: 100%" />
+      </p>
+
+      <p class="example">
+        The component containing the necklace represented by 0000000001 is reflection-invariant,
+        while the component containing the necklace represented by 0000001011 has a distinct
+        reflected partner. Both have cycle length 6 and branching sequence (2, 2, 0).
+      </p>
+
+      <p>
+        Isomorphic components need not represent the same number of words. Their necklaces can have
+        different spatial periods and therefore different rotation-class sizes. The number of
+        represented words is the component&#39;s mass.
+      </p>
+
+      <p class="example">
+        At width 12 there are two isomorphic components with six necklaces each. Each has a
+        one-vertex cycle. One component has mass 16 and the other mass 48; their cycle necklaces
+        have primitive representatives 0 and 011, respectively.
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Tessellations"></div>
+      <br />
+      <p class="section"> Space-Time Diagrams and Tessellations </p>
+
+      <p>
+        A space-time diagram records successive states as rows, with position running horizontally
+        and iteration vertically; repetition is not part of its definition. A necklace cycle gives a
+        periodic example for the binary Ducci map. Choose a representative word on the cycle and
+        apply adjacent XOR to obtain successive rows. Here the evolution runs upward: align
+        neighboring bits so that their sum modulo two appears above and between them. Returning to
+        the same necklace may rotate the row, so one circuit of the cycle can correspond to a
+        vertical shift combined with a horizontal shift.
+      </p>
+
+      <table class="panel-table spacetime-table spacetime-table-local">
+        <tr>
+          <td>0</td><td></td> <td>1</td><td></td> <td>0</td><td></td> <td>0</td><td></td> <td>1</td
+          ><td></td>
+        </tr>
+        <tr>
+          <td></td><td>1</td> <td></td><td>0</td> <td></td><td>0</td> <td></td><td>0</td> <td></td
+          ><td>1</td>
+        </tr>
+        <tr>
+          <td>0</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>1</td
+          ><td></td>
+        </tr>
+      </table>
+
+      <p>
+        Continue the evolution upward and repeat the rows horizontally. The adjacent-XOR map
+        commutes with repetition: if <i>A</i> = <i>u</i><sup><i>k</i></sup> denotes
+        <i>k</i> concatenated copies of <i>u</i>, then <i>D</i>(<i>A</i>) = <i>D</i>(<i>u</i>)<sup
+          ><i>k</i></sup
+        >. The image <i>D</i>(<i>u</i>) need not itself be primitive. This rule lets the cycle
+        define a repeating diagram on the plane.
+      </p>
+
+      <table class="panel-table spacetime-table spacetime-table-periodic">
+        <tr>
+          <td></td><td>0</td> <td></td><td>1</td> <td></td><td>0</td> <td></td><td>1</td> <td></td
+          ><td>0</td> <td></td><td>0</td> <td></td><td>1</td> <td></td><td>0</td> <td></td
+          ><td>1</td> <td></td><td>0</td>
+        </tr>
+        <tr>
+          <td>0</td><td></td> <td>0</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>0</td
+          ><td></td> <td>0</td><td></td> <td>0</td><td></td> <td>1</td><td></td> <td>1</td
+          ><td></td> <td>0</td><td></td>
+        </tr>
+        <tr>
+          <td></td><td>1</td> <td></td><td>1</td> <td></td><td>0</td> <td></td><td>1</td> <td></td
+          ><td>1</td> <td></td><td>1</td> <td></td><td>1</td> <td></td><td>0</td> <td></td
+          ><td>1</td> <td></td><td>1</td>
+        </tr>
+        <tr>
+          <td>0</td><td></td> <td>1</td><td></td> <td>0</td><td></td> <td>0</td><td></td> <td>1</td
+          ><td></td> <td>0</td><td></td> <td>1</td><td></td> <td>0</td><td></td> <td>0</td
+          ><td></td> <td>1</td><td></td>
+        </tr>
+        <tr>
+          <td></td><td>1</td> <td></td><td>0</td> <td></td><td>0</td> <td></td><td>0</td> <td></td
+          ><td>1</td> <td></td><td>1</td> <td></td><td>0</td> <td></td><td>0</td> <td></td
+          ><td>0</td> <td></td><td>1</td>
+        </tr>
+        <tr>
+          <td>0</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>1</td
+          ><td></td> <td>0</td><td></td> <td>1</td><td></td> <td>1</td><td></td> <td>1</td
+          ><td></td> <td>1</td><td></td>
+        </tr>
+      </table>
+
+      <p>
+        A cycle supplies a repeating region of the space-time diagram; its period lattice may
+        include a horizontal shift after one circuit of the necklace cycle. The same information can
+        be rendered geometrically as a
+        <a href="https://en.wikipedia.org/wiki/Tessellation">tessellation, or tiling</a>: a covering
+        of the plane by tiles without gaps or overlapping interiors. The tessellations constructed
+        here are periodic, although periodicity is not required of tessellations in general. In the
+        rendering below, zeros and ones are replaced by lines and triangles: lines connect the
+        positions of ones, and inverted triangles are filled.
+      </p>
+
+      <p>
+        See how the tessellation below corresponds to the zeros and ones in the space-time diagram
+        above.
+      </p>
+
+      <p class="spacetime-figure">
+        <img src="binary-necklaces/figures/tessellation.png" style="width: 37%" />
+      </p>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Catalogue"></div>
+      <br />
+      <p class="section"> Catalogue </p>
+
+      <p>
+        The following PDF files catalogue the graph types and components for widths up to <i>n</i> =
+        14. They list primitive representatives of the necklaces in each component. Graph types are
+        named G<i>x</i>-<i>y</i>, where <i>x</i> is the cycle length and <i>y</i> is the branching
+        sequence written as a word. These are catalogue identifiers, not universal graph notation.
+        The same isomorphism type can occur at several widths.
+      </p>
+
+      <p class="example">
+        At width one there is one graph type, called G1-20. This type occurs at every odd width.
+      </p>
+
+      <p class="example">
+        G1-21120 appears in <i>V</i><sub>4</sub>, <i>V</i><sub>12</sub> and <i>V</i><sub>20</sub>.
+      </p>
+
+      <p class="example">
+        Width five is the first width with two graph types. They are named G1-20 and G3-20.
+      </p>
+
+      <p>
+        The historical catalogue labels component entries C<i>n</i>-<i>x</i>-<i>i</i>. Here
+        <i>n</i> is the smallest width represented by that entry, <i>x</i> is the cycle length, and
+        <i>i</i> distinguishes entries of the same graph type. An appended &ldquo;a&rdquo; denotes a
+        pair of distinct components exchanged by reflection. A label can be reused at different
+        widths when repetition gives corresponding necklaces and the same component pattern; this
+        does not identify words of different lengths.
+      </p>
+
+      <p class="example">
+        C7-1-1a is the first catalogue entry representing a pair of reflected components.
+      </p>
+
+      <p class="example"> C1-1-1 labels the zero-cycle component at every odd width. </p>
+
+      <label for="powpdf">Select </label>
+      <select id="powpdf" onchange="goToPowPdf()">
+        <option value="binary-necklaces/graphs/p1.pdf">n = 1</option>
+        <option value="binary-necklaces/graphs/p2.pdf">n = 2</option>
+        <option value="binary-necklaces/graphs/p3.pdf">n = 3</option>
+        <option value="binary-necklaces/graphs/p4.pdf">n = 4</option>
+        <option value="binary-necklaces/graphs/p5.pdf">n = 5</option>
+        <option value="binary-necklaces/graphs/p6.pdf">n = 6</option>
+        <option value="binary-necklaces/graphs/p7.pdf">n = 7</option>
+        <option value="binary-necklaces/graphs/p8.pdf">n = 8</option>
+        <option value="binary-necklaces/graphs/p9.pdf">n = 9</option>
+        <option value="binary-necklaces/graphs/p10.pdf">n = 10</option>
+        <option value="binary-necklaces/graphs/p11.pdf">n = 11</option>
+        <option value="binary-necklaces/graphs/p12.pdf">n = 12</option>
+        <option value="binary-necklaces/graphs/p13.pdf">n = 13</option>
+        <option value="binary-necklaces/graphs/p14.pdf">n = 14</option>
+      </select>
+
+      <p>
+        The following CSV files describe widths up to <i>n</i> = 28, including each graph type and
+        component entry, its size, and its branching sequence. The field names distinguish
+        reflection-invariant components from reflected component pairs. Each row in the latter
+        section describes one component of the pair; its counts are not doubled.
+      </p>
+
+      <label for="powcsv">Select </label>
+      <select id="powcsv" onchange="goToPowCsv()">
+        <option value="binary-necklaces/powersets/p1.csv">n = 1</option>
+        <option value="binary-necklaces/powersets/p2.csv">n = 2</option>
+        <option value="binary-necklaces/powersets/p3.csv">n = 3</option>
+        <option value="binary-necklaces/powersets/p4.csv">n = 4</option>
+        <option value="binary-necklaces/powersets/p5.csv">n = 5</option>
+        <option value="binary-necklaces/powersets/p6.csv">n = 6</option>
+        <option value="binary-necklaces/powersets/p7.csv">n = 7</option>
+        <option value="binary-necklaces/powersets/p8.csv">n = 8</option>
+        <option value="binary-necklaces/powersets/p9.csv">n = 9</option>
+        <option value="binary-necklaces/powersets/p10.csv">n = 10</option>
+        <option value="binary-necklaces/powersets/p11.csv">n = 11</option>
+        <option value="binary-necklaces/powersets/p12.csv">n = 12</option>
+        <option value="binary-necklaces/powersets/p13.csv">n = 13</option>
+        <option value="binary-necklaces/powersets/p14.csv">n = 14</option>
+        <option value="binary-necklaces/powersets/p15.csv">n = 15</option>
+        <option value="binary-necklaces/powersets/p16.csv">n = 16</option>
+        <option value="binary-necklaces/powersets/p17.csv">n = 17</option>
+        <option value="binary-necklaces/powersets/p18.csv">n = 18</option>
+        <option value="binary-necklaces/powersets/p19.csv">n = 19</option>
+        <option value="binary-necklaces/powersets/p20.csv">n = 20</option>
+        <option value="binary-necklaces/powersets/p21.csv">n = 21</option>
+        <option value="binary-necklaces/powersets/p22.csv">n = 22</option>
+        <option value="binary-necklaces/powersets/p23.csv">n = 23</option>
+        <option value="binary-necklaces/powersets/p24.csv">n = 24</option>
+        <option value="binary-necklaces/powersets/p25.csv">n = 25</option>
+        <option value="binary-necklaces/powersets/p26.csv">n = 26</option>
+        <option value="binary-necklaces/powersets/p27.csv">n = 27</option>
+        <option value="binary-necklaces/powersets/p28.csv">n = 28</option>
+      </select>
+
+      <p>
+        The following PDF files show the catalogue&#39;s tessellations derived from periodic
+        space-time diagrams up to <i>n</i> = 14. The label T<i>n</i>-<i>x</i>-<i>y</i> corresponds
+        to the first component entry C<i>n</i>-<i>x</i>-<i>y</i> from whose cycle that tessellation
+        is derived.
+      </p>
+
+      <label for="tespdf">Select </label>
+      <select id="tespdf" onchange="goToTesPdf()">
+        <option value="binary-necklaces/tessellations/t1-1-1.pdf">T1-1-1</option>
+        <option value="binary-necklaces/tessellations/t3-1-1.pdf">T3-1-1</option>
+        <option value="binary-necklaces/tessellations/t5-3-1.pdf">T5-3-1</option>
+        <option value="binary-necklaces/tessellations/t6-2-1.pdf">T6-2-1</option>
+        <option value="binary-necklaces/tessellations/t7-1-1a.pdf">T7-1-1a</option>
+        <option value="binary-necklaces/tessellations/t7-7-1.pdf">T7-7-1</option>
+        <option value="binary-necklaces/tessellations/t9-7-1.pdf">T9-7-1</option>
+        <option value="binary-necklaces/tessellations/t9-7-2.pdf">T9-7-2</option>
+        <option value="binary-necklaces/tessellations/t9-7-3a.pdf">T9-7-3a</option>
+        <option value="binary-necklaces/tessellations/t10-6-1.pdf">T10-6-1</option>
+        <option value="binary-necklaces/tessellations/t10-6-2.pdf">T10-6-2</option>
+        <option value="binary-necklaces/tessellations/t10-6-3a.pdf">T10-6-3a</option>
+        <option value="binary-necklaces/tessellations/t11-31-1.pdf">T11-31-1</option>
+        <option value="binary-necklaces/tessellations/t11-31-2a.pdf">T11-31-2a</option>
+        <option value="binary-necklaces/tessellations/t12-4-1.pdf">T12-4-1</option>
+        <option value="binary-necklaces/tessellations/t12-4-2.pdf">T12-4-2</option>
+        <option value="binary-necklaces/tessellations/t12-4-3.pdf">T12-4-3</option>
+        <option value="binary-necklaces/tessellations/t12-4-4a.pdf">T12-4-4a</option>
+        <option value="binary-necklaces/tessellations/t13-63-1.pdf">T13-63-1</option>
+        <option value="binary-necklaces/tessellations/t13-63-2a.pdf">T13-63-2a</option>
+        <option value="binary-necklaces/tessellations/t13-63-3a.pdf">T13-63-3a</option>
+        <option value="binary-necklaces/tessellations/t14-2-1a.pdf">T14-2-1a</option>
+        <option value="binary-necklaces/tessellations/t14-2-2a.pdf">T14-2-2a</option>
+        <option value="binary-necklaces/tessellations/t14-14-1.pdf">T14-14-1</option>
+        <option value="binary-necklaces/tessellations/t14-14-2.pdf">T14-14-2</option>
+        <option value="binary-necklaces/tessellations/t14-14-3.pdf">T14-14-3</option>
+        <option value="binary-necklaces/tessellations/t14-14-4.pdf">T14-14-4</option>
+        <option value="binary-necklaces/tessellations/t14-14-5a.pdf">T14-14-5a</option>
+        <option value="binary-necklaces/tessellations/t14-14-6a.pdf">T14-14-6a</option>
+        <option value="binary-necklaces/tessellations/t14-14-7a.pdf">T14-14-7a</option>
+        <option value="binary-necklaces/tessellations/t14-14-8a.pdf">T14-14-8a</option>
+        <option value="binary-necklaces/tessellations/t14-14-9a.pdf">T14-14-9a</option>
+        <option value="binary-necklaces/tessellations/t14-14-10a.pdf">T14-14-10a</option>
+        <option value="binary-necklaces/tessellations/t14-14-11a.pdf">T14-14-11a</option>
+        <option value="binary-necklaces/tessellations/t14-14-12a.pdf">T14-14-12a</option>
+      </select>
+
+      <!-- *********************************************************************** -->
+      <!-- *********************************************************************** -->
+
+      <div id="Appendix"></div>
+      <br />
+      <p class="section"> Appendix </p>
+
+      <p>
+        From this question on
+        <a
+          href="https://math.stackexchange.com/questions/4609848/how-are-bitloops-links-and-chains-more-formally-described"
+          >StackExchange</a
+        >.
+      </p>
+
+      <p>
+        Binary words are vectors in the
+        <a href="https://en.wikipedia.org/wiki/Vector_space">vector space</a> <i>V</i
+        ><sub><i>n</i></sub> =
+        <a href="https://en.wikipedia.org/wiki/GF%282%29"><i>F</i><sub>2</sub></a
+        ><sup><i>n</i></sup
+        >. Rotation and adjacent XOR are
+        <a href="https://en.wikipedia.org/wiki/Linear_map">linear transformations</a>. The first two
+        matrices below represent those maps for <i>n</i> = 6. The third matrix, <i>S</i>,
+        selects a preimage whose first bit is zero on the even-parity image of
+        <i>D</i>; it is not an inverse of <i>D</i> on the whole word space. Each displayed matrix
+        has <i>n</i> rows and columns.
+      </p>
+
+      <p style="example">
+        <img src="binary-necklaces/figures/matrices.png" style="width: 100%" />
+      </p>
+
+      <p>
+        The adjacent-XOR matrix is <i>D</i> = <i>I</i> + <i>R</i>, where <i>R</i> is the matrix of
+        the cyclic rotation <i>&#945;</i> and <i>I</i> is the identity matrix. The entries are added
+        modulo two.
+      </p>
+
+      <p>
+        These matrices act on words. Commutation with rotation makes adjacent XOR well defined on
+        necklaces as well. Its image consists exactly of the even-weight words, and its
+        <a href="https://en.wikipedia.org/wiki/Kernel_%28linear_algebra%29">kernel</a> consists of
+        the all-zero and all-one words. Every even-weight target has two word preimages, which are
+        complements; these may represent one necklace or two distinct necklaces. The displayed
+        preimage-selection matrix chooses one of them on that image. On an odd-weight target there
+        is no preimage, so its output cannot be interpreted as one.
+      </p>
+    </div>
+
+    <!-- chat widget embed code -->
+    <style>
+      /* floating chat button */
+      #chat-widget-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 64px;
+        height: 64px;
+        cursor: pointer;
+        z-index: 1000;
+        transition: transform 0.2s;
+      }
+      #chat-widget-button:hover {
+        transform: scale(1.1);
+      }
+      #chat-widget-button img {
+        width: 64px;
+        height: 64px;
+      }
+      /* chat popup window */
+      #chat-widget-popup {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 600px;
+        height: 700px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #chat-widget-popup.open {
+        display: flex;
+      }
+      #chat-widget-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #chat-widget-iframe {
+        flex: 1;
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
+      /* mobile responseive */
+      @media (max-width: 640px) {
+        #chat-widget-popup {
+          bottom: 0;
+          right: 0;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 0;
+        }
+        #chat-widget-button {
+          bottom: 64px;
+          right: 64px;
+        }
+      }
+    </style>
+    <!-- chat button -->
+    <div id="chat-widget-button">
+      <img src="binary-necklaces/chatbot/untitled-head-bold-white.png" alt="Chat" />
+    </div>
+    <!-- chat popup -->
+    <div id="chat-widget-popup">
+      <iframe id="chat-widget-iframe" src="binary-necklaces/chatbot/index.html"></iframe>
+    </div>
+    <script>
+      // toggle chat popup
+      const button = document.getElementById("chat-widget-button");
+      const popup = document.getElementById("chat-widget-popup");
+
+      button.addEventListener("click", function () {
+        popup.classList.toggle("open");
+      });
+    </script>
+  </body>
+</html>

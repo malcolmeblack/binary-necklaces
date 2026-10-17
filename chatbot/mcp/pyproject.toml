@@ -1,0 +1,13 @@
+[project]
+name = "binary-necklaces-chatbot"
+version = "0.1.0"
+description = "Exposition-grounded binary-necklace chatbot and calculator tools"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.42.68",
+    "fastapi>=0.135.1",
+    "httpx>=0.28.1",
+    "mcp>=1.26.0",
+    "uvicorn>=0.34.0",
+]

@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="Chatbot Infrastructure" id="chatbot-infra">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0" adaptiveColors="auto">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="user" value="&lt;b&gt;User Browser&lt;/b&gt;&lt;br&gt;React chat UI on&lt;br&gt;binary-necklaces.html" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cf" value="&lt;b&gt;Amazon CloudFront&lt;/b&gt;&lt;br&gt;Distribution E30DZIU4LRVUNW&lt;br&gt;malcolmblack.org / www.malcolmblack.org" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="300" y="350" width="220" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;Amazon S3 (Static Website)&lt;/b&gt;&lt;br&gt;malcolmblack.org&lt;br&gt;us-west-2&lt;br&gt;Origin: s3-website" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=14;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="150" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="r53" value="&lt;b&gt;Amazon Route 53&lt;/b&gt;&lt;br&gt;Public Hosted Zone&lt;br&gt;mcp.malcolmblack.org &amp;#8594; 35.85.120.245" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="620" y="450" width="220" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ec2" value="&lt;b&gt;Amazon EC2&lt;/b&gt;&lt;br&gt;i-0c8ccad1a84cd54b8&lt;br&gt;t4g.small &amp;#183; us-west-2b&lt;br&gt;Public IP 35.85.120.245" style="swimlane;startSize=24;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="600" y="600" width="260" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="docker" value="&lt;b&gt;Docker Container&lt;/b&gt;" style="swimlane;startSize=22;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="ec2">
+          <mxGeometry x="30" y="40" width="200" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="mcp" value="&lt;b&gt;MCP Server&lt;/b&gt;&lt;br&gt;Agentic chatbot backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="docker">
+          <mxGeometry x="20" y="35" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="user" target="cf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="default (*)&#10;static site" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cf" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="/mcp&#10;custom origin&#10;mcp.malcolmblack.org" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cf" target="r53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="resolves to&#10;EC2 public IP" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="r53" target="ec2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
