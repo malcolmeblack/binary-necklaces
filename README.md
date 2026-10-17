@@ -5,4 +5,3 @@ Source for the calculator, tessellator, and chatbot accompanying
 
 - [Calculator and tessellator](bitcalctess/): Python services and their HTML interface.
 - [Chatbot](chatbot/): Next.js interface, MCP tools, exposition reference, and Bedrock orchestration.
-- [Research papers by AI](papers-ai/): Hands-free AI analysis

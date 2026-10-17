@@ -16,4 +16,5 @@ __pycache__/
 
 # Generated archives.
 /chatbot/mcp.zip
+/chatbot/old-versions/
 /bitcalctess/calculator/java-ai/results.zip
