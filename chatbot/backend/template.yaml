@@ -1,0 +1,340 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Binary necklaces chatbot functions using the website's existing REST API, CloudFront distribution and S3 buckets.
+
+Parameters:
+  CodeBucket:
+    Type: String
+    Default: malcolmblack
+    Description: Existing private S3 bucket containing the packaged Lambda code, in the stack region.
+  CodeKey:
+    Type: String
+    MinLength: 1
+    Description: Content-addressed ZIP object uploaded by deploy.sh.
+  PrivateBucketName:
+    Type: String
+    Default: malcolmblack
+    Description: Existing private S3 bucket for short-lived chatbot jobs.
+  PrivatePrefix:
+    Type: String
+    Default: binary-necklaces/chatbot
+    AllowedPattern: '[A-Za-z0-9][A-Za-z0-9/_-]*[A-Za-z0-9_-]'
+    Description: Chatbot prefix without a leading or trailing slash. Jobs are stored below jobs/.
+  RestApiId:
+    Type: String
+    AllowedPattern: '[a-z0-9]+'
+    Description: Existing website REST API.
+  ApiParentResourceId:
+    Type: String
+    AllowedPattern: '[a-z0-9]+'
+    Description: Resource ID of /api in the existing REST API.
+  OriginSecret:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    MaxLength: 128
+    AllowedPattern: '[A-Za-z0-9_-]+'
+    Description: Secret sent by CloudFront in the X-Api-Origin header to all API Lambdas.
+  ModelId:
+    Type: String
+    Default: us.anthropic.claude-opus-4-6-v1
+    Description: Bedrock system inference-profile ID, or foundation-model ID when UseInferenceProfile is false.
+  FoundationModelId:
+    Type: String
+    Default: anthropic.claude-opus-4-6-v1
+    Description: Foundation model behind the inference profile, for the worker's IAM policy.
+  UseInferenceProfile:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+  CalculatorFunctionArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:[^:]+:lambda:[^:]+:[0-9]{12}:function:[A-Za-z0-9_-]+(:[A-Za-z0-9_-]+)?$'
+    Description: Optional existing BNCT calculator Lambda ARN. Empty uses the deployed BNCT HTTPS endpoint.
+  WorkerConcurrency:
+    Type: Number
+    Default: 4
+    MinValue: 1
+    MaxValue: 20
+  AlarmTopicArn:
+    Type: String
+    Default: ''
+    Description: Optional SNS topic ARN for the output-token usage alarm.
+
+Conditions:
+  UsesInferenceProfile: !Equals [!Ref UseInferenceProfile, 'true']
+  HasCalculatorFunction: !Not [!Equals [!Ref CalculatorFunctionArn, '']]
+  HasAlarmTopic: !Not [!Equals [!Ref AlarmTopicArn, '']]
+
+Resources:
+  ApiFunctionLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/binary-necklaces-chatbot-api
+      RetentionInDays: 14
+
+  WorkerFunctionLog:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/binary-necklaces-chatbot-worker
+      RetentionInDays: 14
+
+  WorkerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ChatbotWorker
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt WorkerFunctionLog.Arn
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${PrivateBucketName}/${PrivatePrefix}/jobs/*'
+              - !If
+                - UsesInferenceProfile
+                - Effect: Allow
+                  Action: bedrock:InvokeModel
+                  Resource: !Sub 'arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ModelId}'
+                - Effect: Allow
+                  Action: bedrock:InvokeModel
+                  Resource: !Sub 'arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${ModelId}'
+              - !If
+                - UsesInferenceProfile
+                - Effect: Allow
+                  Action: bedrock:InvokeModel
+                  Resource: !Sub 'arn:${AWS::Partition}:bedrock:*::foundation-model/${FoundationModelId}'
+                  Condition:
+                    StringEquals:
+                      bedrock:InferenceProfileArn: !Sub 'arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${ModelId}'
+                - !Ref AWS::NoValue
+              - !If
+                - HasCalculatorFunction
+                - Effect: Allow
+                  Action: lambda:InvokeFunction
+                  Resource: !Ref CalculatorFunctionArn
+                - !Ref AWS::NoValue
+
+  WorkerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: binary-necklaces-chatbot-worker
+      Description: Asynchronous binary necklaces analysis worker.
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: handler.worker_handler
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeKey
+      Role: !GetAtt WorkerRole.Arn
+      Timeout: 240
+      MemorySize: 1024
+      ReservedConcurrentExecutions: !Ref WorkerConcurrency
+      LoggingConfig:
+        LogGroup: !Ref WorkerFunctionLog
+      Environment:
+        Variables:
+          JOBS_BUCKET: !Ref PrivateBucketName
+          JOBS_PREFIX: !Sub '${PrivatePrefix}/jobs/'
+          JOB_TTL_SECONDS: '900'
+          MODEL_ID: !Ref ModelId
+          MAX_OUTPUT_TOKENS: '1000'
+          MAX_TOOL_ROUNDS: '3'
+          WORKER_BUDGET_SECONDS: '225'
+          CALCULATOR_FUNCTION_ARN: !Ref CalculatorFunctionArn
+
+  WorkerEventInvokeConfig:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref WorkerFunction
+      Qualifier: '$LATEST'
+      MaximumEventAgeInSeconds: 300
+      MaximumRetryAttempts: 0
+
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ChatbotApi
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt ApiFunctionLog.Arn
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject]
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${PrivateBucketName}/${PrivatePrefix}/jobs/*'
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt WorkerFunction.Arn
+
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: binary-necklaces-chatbot-api
+      Description: Submit chatbot questions and retrieve their asynchronous answers.
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: handler.api_handler
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeKey
+      Role: !GetAtt ApiRole.Arn
+      Timeout: 15
+      MemorySize: 256
+      LoggingConfig:
+        LogGroup: !Ref ApiFunctionLog
+      Environment:
+        Variables:
+          JOBS_BUCKET: !Ref PrivateBucketName
+          JOBS_PREFIX: !Sub '${PrivatePrefix}/jobs/'
+          JOB_TTL_SECONDS: '900'
+          WORKER_FUNCTION_NAME: !Ref WorkerFunction
+          ORIGIN_SECRET: !Ref OriginSecret
+          MAX_QUERY_BYTES: '12000'
+
+  SubmitPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ApiFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/POST/api/chatbot'
+
+  StatusPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ApiFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub 'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${RestApiId}/*/GET/api/chatbot/*'
+
+  ChatbotApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApiId
+      ParentId: !Ref ApiParentResourceId
+      PathPart: chatbot
+
+  ChatbotJobApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestApiId
+      ParentId: !Ref ChatbotApiResource
+      PathPart: '{jobId}'
+
+  ChatbotPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApiId
+      ResourceId: !Ref ChatbotApiResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations'
+
+  ChatbotGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestApiId
+      ResourceId: !Ref ChatbotJobApiResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestParameters:
+        method.request.path.jobId: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations'
+
+  ChatbotIndex:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: binary-necklaces-chatbot-shared-index
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Resolve the chatbot directory without changing other website paths.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          if (request.uri === '/binary-necklaces/chatbot' ||
+              request.uri === '/binary-necklaces/chatbot/') {
+            request.uri = '/binary-necklaces/chatbot/index.html';
+          }
+          return request;
+        }
+
+  OutputTokenAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: HasAlarmTopic
+    Properties:
+      AlarmName: binary-necklaces-chatbot-output-tokens
+      AlarmDescription: Output tokens exceeded 1M in a 24-hour period.
+      Namespace: BinaryNecklacesChatbot
+      MetricName: outputTokens
+      Statistic: Sum
+      Period: 86400
+      EvaluationPeriods: 1
+      Threshold: 1000000
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmTopicArn
+      OKActions:
+        - !Ref AlarmTopicArn
+
+  StaticCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: binary-necklaces-chatbot-shared-static
+        MinTTL: 0
+        DefaultTTL: 0
+        MaxTTL: 31536000
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          CookiesConfig: {CookieBehavior: none}
+          HeadersConfig: {HeaderBehavior: none}
+          QueryStringsConfig: {QueryStringBehavior: none}
+
+Outputs:
+  ApiOriginDomain:
+    Value: !Sub '${RestApiId}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+    Description: Existing REST API domain. The CloudFront chatbot origin uses the selected stage as its origin path.
+  ApiFunctionName:
+    Value: !Ref ApiFunction
+  ApiFunctionArn:
+    Value: !GetAtt ApiFunction.Arn
+  WorkerFunctionName:
+    Value: !Ref WorkerFunction
+  WorkerFunctionArn:
+    Value: !GetAtt WorkerFunction.Arn
+  StaticCachePolicyId:
+    Value: !Ref StaticCachePolicy
+  IndexFunctionArn:
+    Value: !GetAtt ChatbotIndex.FunctionARN
+  JobsBucketName:
+    Value: !Ref PrivateBucketName
+  JobsPrefix:
+    Value: !Sub '${PrivatePrefix}/jobs/'

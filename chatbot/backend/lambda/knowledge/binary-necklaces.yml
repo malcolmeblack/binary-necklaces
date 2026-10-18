@@ -8,8 +8,8 @@ metadata:
   source: /binary-necklaces.html
   description: Terminology and reference definitions aligned with the current exposition. Binary words
     and branching sequences are strings; leading zeros are significant.
-  compatibility: The file bitloops.yml is an identical compatibility copy. Historical concept keys are
-    mapped below; concept IDs remain stable.
+  compatibility: Historical concept keys are mapped below to recognize older questions; use the
+    current concept labels in answers. Concept IDs remain stable.
 legacy_concept_keys:
   bitstring: binary_word
   bitloop: binary_necklace
@@ -582,3 +582,12 @@ catalogue_conventions:
     in that row are per component, not doubled.
   total_components: reflection-invariant-components + 2 * reflected-component-pairs
   primitive_necklaces: Counts necklaces whose least spatial period equals the ambient width n.
+
+current_calculator:
+  endpoint: /api/bnct/calc
+  input: bitstring is a binary word of length 1 to 4096; preserve leading zeros.
+  counts: Exact mathematical counts and periods are decimal strings. Do not convert them through floating point.
+  component_convention: Counts actual weakly connected components, not reflected component pairs.
+  availability: A deferred or unavailable value is unknown, not zero. A truncated preview is not a complete list.
+  graph_rows: A graph type can occur in several components with different word masses. total_words is the sum over all components of that type.
+  fixed_necklace: Compare the least rotation of the word with the least rotation of its adjacent-XOR image, not the literal words.

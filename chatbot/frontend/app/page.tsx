@@ -1,15 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { askQuestion } from './chat-api'
 
 type Message = {
 	role: string
 	text: string
 }
 
-const MCP_URL = process.env.NEXT_PUBLIC_MCP_URL || ''
 const DEFAULT_QUESTION = "Is the necklace represented by 1100101 fixed by the adjacent-XOR map?"
+
+function statusLabel(status: string): string | undefined {
+	if (status.startsWith('reading_doc')) return 'reading document...'
+	return {
+		running_parallel_analyses: 'running parallel analyses...',
+		judging: 'judging responses...',
+		first_responder: 'formulating response...',
+		skeptic: 'verifying accuracy...',
+		arbiter: 'synthesizing...',
+		calculating: 'calculating...',
+	}[status]
+}
 
 export default function Chat() {
 
@@ -17,10 +29,19 @@ export default function Chat() {
 	const [input, setInput] = useState('')
 	const [statusMessages, setStatusMessages] = useState<string[]>([])
 	const [isLoading, setIsLoading] = useState(false)
+	const request = useRef<AbortController | null>(null)
+
+	useEffect(() => () => {
+		const active = request.current
+		request.current = null
+		active?.abort()
+	}, [])
 
 	async function sendMessage() {
 
-		if (isLoading) return
+		if (request.current) return
+		const active = new AbortController()
+		request.current = active
 
 		const questionText = input.trim() || DEFAULT_QUESTION
 
@@ -31,74 +52,24 @@ export default function Chat() {
 		setIsLoading(true)
 
 		try {
-			const res = await fetch(`${MCP_URL}/mcp`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ query: userMessage.text })
-			})
-
-			if (!res.ok) {
-				const errorData = await res.json().catch(() => ({}))
-				throw new Error(errorData.detail || `HTTP ${res.status}: ${res.statusText}`)
-			}
-
-			const reader = res.body?.getReader()
-			const decoder = new TextDecoder()
-
-			if (!reader) {
-				throw new Error('No response body')
-			}
-
-			let buffer = ''
-
-			while (true) {
-				const { done, value } = await reader.read()
-				if (done) break
-
-				buffer += decoder.decode(value, { stream: true })
-				const lines = buffer.split('\n')
-				buffer = lines.pop() || ''
-
-				for (const line of lines) {
-					if (line.startsWith('data: ')) {
-						const data = JSON.parse(line.slice(6))
-
-						if (data.status === 'running_parallel_analyses') {
-							setStatusMessages(prev => [...prev, 'running parallel analyses...'])
-						} else if (data.status === 'judging') {
-							setStatusMessages(prev => [...prev, 'judging responses...'])
-						} else if (data.status === 'first_responder') {
-							setStatusMessages(prev => [...prev, 'formulating response...'])
-						} else if (data.status === 'skeptic') {
-							setStatusMessages(prev => [...prev, 'verifying accuracy...'])
-						} else if (data.status === 'arbiter') {
-							setStatusMessages(prev => [...prev, 'synthesizing...'])
-						} else if (data.status.startsWith('reading_doc')) {
-							setStatusMessages(prev => [...prev, 'reading document...'])
-						} else if (data.status === 'calculating') {
-							setStatusMessages(prev => [...prev, 'calculating...'])
-						} else if (data.status === 'done') {
-							const botMessage = {
-								role: 'assistant',
-								text: data.response
-							}
-							setMessages(prev => [...prev, botMessage])
-							setStatusMessages([])
-							setIsLoading(false)
-						} else if (data.status === 'error') {
-							throw new Error(data.error)
-						}
-					}
-				}
-			}
+			const response = await askQuestion(userMessage.text, status => {
+				const label = statusLabel(status)
+				if (label && request.current === active) setStatusMessages(prev => [...prev, label])
+			}, active.signal)
+			if (request.current === active) setMessages(prev => [...prev, { role: 'assistant', text: response }])
 		} catch (error) {
+			if (request.current !== active) return
 			const errorMessage = {
 				role: 'assistant',
 				text: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
 			}
 			setMessages(prev => [...prev, errorMessage])
-			setStatusMessages([])
-			setIsLoading(false)
+		} finally {
+			if (request.current === active) {
+				request.current = null
+				setStatusMessages([])
+				setIsLoading(false)
+			}
 		}
 	}
 
