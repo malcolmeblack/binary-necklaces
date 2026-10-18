@@ -1,9 +1,0 @@
-Command: python3 -u test/validate.py
-Calculator and proof-validation launches: -Xmx512m
-Exit code: 0
-Elapsed wall seconds: 656.71
-User CPU seconds (process tree): 749.94
-System CPU seconds (process tree): 20.84
-Maximum RSS reported for process tree (KiB): 449324
-Maximum RSS is not the sum of simultaneous process memory.
-This measures the entire suite, not one calculator run.

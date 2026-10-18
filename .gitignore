@@ -6,6 +6,9 @@
 !/bitcalctess/calculator/java/log/analyze_logs.py
 !/bitcalctess/calculator/java/output/analyze_output.py
 
+# Claude Code.
+.claude/
+
 # Build products and Python caches.
 build/
 .test-build/

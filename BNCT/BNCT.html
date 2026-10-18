@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Binary Necklace Calculator and Tessellator</title>
+<link rel="stylesheet" href="../style.css">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<style>
+button, input { background-color: #2d2b38; border: none; color: #ffffff; }
+button, summary { cursor: pointer; }
+input { font-family: monospace; }
+button:active { background-color: #dddd00; }
+button:disabled { opacity: .5; cursor: default; }
+table { border-spacing: 10px; }
+.c1 { width: 240px; }
+th.c1 { font-weight: normal; text-align: left; }
+.c2 { background-color: #2d2b38; width: 225px; max-width: 225px; font-family: monospace; }
+.c2i { background-color: #2d2b38; }
+#word { width: 225px; max-width: 100%; box-sizing: border-box; }
+.major-heading { font-family: "CMSroman", serif; font-size: 18pt; font-weight: normal; }
+.section-heading { font-family: "CMSroman", serif; font-size: 14pt; font-weight: normal; }
+.value { max-height: 8em; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.table-wrap { max-width: 100%; overflow: auto; }
+.data-table th { text-align: left; font-weight: normal; }
+.data-table td { background-color: #2d2b38; font-family: monospace; }
+.data-table .value { min-width: 5em; max-width: 225px; }
+.preview .value { width: 225px; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.error { white-space: pre-wrap; color: #ff0000; font-weight: normal; }
+#results { overflow-y: auto; }
+#download-image { margin-bottom: 12px; }
+#graphs-container, #rendered-figure { width: 100%; max-width: 100%; box-sizing: border-box; }
+#rendered-figure { margin: 0; }
+#tessellation-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.7320508075688772;
+  background: #555;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  touch-action: none;
+  user-select: none;
+}
+#tessellation-viewport.has-image { cursor: grab; }
+#tessellation-viewport.dragging { cursor: grabbing; }
+#image {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  transform-origin: 0 0;
+  image-rendering: auto;
+  pointer-events: none;
+}
+.zoom-controls { display: flex; justify-content: flex-start; gap: 6px; margin-top: 6px; }
+.zoom-controls button { display: inline-flex; padding: 2px; align-items: center; justify-content: center; }
+.zoom-controls svg { width: 24px; height: 24px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main class="margin">
+<a href="../binary-necklaces.html" aria-label="Back to the exposition">&#8592;</a>
+<p id="title">Binary Necklace Calculator and Tessellator</p>
+
+<br>
+<form id="calculator-form">
+<div class="table-wrap"><table>
+  <tr>
+    <td class="c1"><label for="word">Enter a binary word:</label></td>
+    <td class="c2i"><input id="word" name="word" type="text" size="28" spellcheck="false" autocapitalize="off" autocomplete="off"></td>
+    <td><button type="submit">Submit</button></td>
+  </tr>
+</table></div>
+</form>
+
+<br>
+<section id="results" aria-labelledby="calculations-title">
+<h2 id="calculations-title" class="major-heading">Calculations</h2>
+<button id="download-results" type="button" hidden>Download results</button>
+<p id="calculation-error" class="error" role="alert" hidden></p>
+<h3 class="section-heading">Properties of the binary word:</h3>
+<div class="table-wrap"><table aria-label="Properties of the binary word"><tbody id="word-properties"></tbody></table></div>
+<br>
+<h3 class="section-heading">Properties of its binary necklace:</h3>
+<div class="table-wrap"><table aria-label="Properties of its binary necklace"><tbody id="necklace-properties"></tbody></table></div>
+<br>
+<h3 class="section-heading">Adjacent-XOR dynamics:</h3>
+<div class="table-wrap"><table aria-label="Adjacent-XOR dynamics"><tbody id="dynamics-properties"></tbody></table></div>
+<br>
+<h3 class="section-heading">Properties of its tree and weakly connected component:</h3>
+<div class="table-wrap"><table aria-label="Tree and weakly connected component"><tbody id="component-properties"></tbody></table></div>
+<br>
+<h3 class="section-heading">Properties of the power set and necklace quotient:</h3>
+<div class="table-wrap"><table aria-label="Power set and necklace quotient"><tbody id="space-properties"></tbody></table></div>
+<div id="graphs-container" class="table-wrap" hidden></div>
+<div id="graph-pagination" class="actions" hidden><button id="previous-graphs" type="button">Previous</button><button id="next-graphs" type="button">Next</button></div>
+<div id="preview-section" hidden>
+<br>
+<details id="cycle-preview" hidden><summary>Cycle preview</summary><div id="preview-cycle" class="table-wrap"></div></details>
+<details id="tree-preview" hidden><summary>Tree preview</summary><div id="preview-tree" class="table-wrap"></div></details>
+</div>
+</section>
+
+<br>
+<section aria-labelledby="tessellation-title">
+<h2 id="tessellation-title" class="major-heading">Tessellation</h2>
+<button id="download-image" type="button" hidden>Download image</button>
+<p id="render-error" class="error" role="alert" hidden></p>
+<figure id="rendered-figure">
+<div id="tessellation-viewport" role="img" aria-label="Tessellation"><img id="image" draggable="false" alt="" hidden><div id="loading-overlay" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;background-color:#555;color:#aaa;font-size:0.9rem">Loading&#8230;</div></div>
+<div class="zoom-controls">
+  <button id="zoom-in" type="button" aria-label="Zoom in" title="Zoom in" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15L22 22M6 10H14M10 6V14"/></svg></button>
+  <button id="zoom-out" type="button" aria-label="Zoom out" title="Zoom out" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M15 15L22 22M6 10H14"/></svg></button>
+</div>
+</figure>
+</section>
+
+<br>
+<p><a href="https://github.com/malcolmeblack/binary-necklaces" aria-label="Source on GitHub"><svg width="98" height="96" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+			<path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#fff"/>
+		</svg></a></p>
+<br><br><br><br><br><br>
+</main>
+<script>
+'use strict';
+const ENDPOINTS = { calculator: '/api/bnct/calc', tessellator: '/api/bnct/tess' };
+const MAX_WORD_LENGTH = 4096;
+const REQUEST_TIMEOUT_MS = 29000;
+const GRAPH_PAGE_SIZE = 100;
+const byId = id => document.getElementById(id);
+const requests = { calculation: null, render: null };
+let currentResult = null;
+let imageUrl = null;
+let imageName = null;
+let graphRows = [];
+let graphPage = 0;
+let imageGeneration = 0;
+const viewport = byId('tessellation-viewport');
+const loadingOverlay = byId('loading-overlay');
+const view = { loaded: false, width: 0, height: 0, viewportWidth: 0, viewportHeight: 0,
+  scale: 1, minimum: 1, maximum: 1, x: 0, y: 0, drag: null };
+const clamp = (value, minimum, maximum) => Math.max(minimum, Math.min(maximum, value));
+
+function setError(kind, message = '') {
+  const element = byId(kind === 'calculation' ? 'calculation-error' : 'render-error');
+  element.textContent = message;
+  element.hidden = !message;
+  if (kind === 'render' && message) loadingOverlay.style.display = 'none';
+}
+function readWord() {
+  const word = byId('word').value.replace(/\s/g, '');
+  if (!/^[01]+$/.test(word) || word.length > MAX_WORD_LENGTH) {
+    throw new Error('Enter a binary word of length 1 to 4,096.');
+  }
+  return word;
+}
+function shown(value) {
+  if (value === null || value === undefined) return 'Not available';
+  if (Array.isArray(value)) return value.length ? value.map(shown).join('\n') : 'None';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+function valueCell(value, empty = false) {
+  const cell = document.createElement('td');
+  const content = document.createElement('div'); content.className = 'value';
+  content.textContent = empty ? '' : shown(value);
+  if (content.textContent.length > 128) content.tabIndex = 0;
+  cell.append(content);
+  return cell;
+}
+function properties(id, rows, empty = false) {
+  const fragment = document.createDocumentFragment();
+  rows.forEach(([label, value]) => {
+    if (value === undefined && !empty) return;
+    const row = document.createElement('tr');
+    const term = document.createElement('th'); term.scope = 'row'; term.className = 'c1'; term.textContent = label;
+    const description = valueCell(value, empty); description.className = 'c2';
+    row.append(term, description); fragment.append(row);
+  });
+  byId(id).replaceChildren(fragment);
+}
+function table(containerId, headers, rows, className = '') {
+  const element = document.createElement('table'); element.className = 'data-table ' + className;
+  const head = document.createElement('thead'); const heading = document.createElement('tr');
+  headers.forEach(label => { const cell = document.createElement('th'); cell.scope = 'col'; cell.textContent = label; heading.append(cell); });
+  head.append(heading); element.append(head);
+  const body = document.createElement('tbody');
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    row.forEach(value => tr.append(valueCell(value)));
+    body.append(tr);
+  });
+  element.append(body); byId(containerId).replaceChildren(element);
+}
+
+function renderGraphPage(page) {
+  graphPage = Math.max(0, Math.min(page, Math.ceil(graphRows.length / GRAPH_PAGE_SIZE) - 1));
+  byId('graphs-container').hidden = !graphRows.length;
+  byId('graph-pagination').hidden = graphRows.length <= GRAPH_PAGE_SIZE;
+  if (!graphRows.length) { byId('graphs-container').replaceChildren(); return; }
+  const start = graphPage * GRAPH_PAGE_SIZE;
+  const end = Math.min(start + GRAPH_PAGE_SIZE, graphRows.length);
+  table('graphs-container', ['Graph type', 'Components', 'Cycle length', 'Tree depth', 'Branching sequence', 'Necklaces / component', 'Words across all components'], graphRows.slice(start, end).map(g => [
+    g.name, g.components, g.cycle_length, g.depth,
+    Array.isArray(g.branching_sequence) ? g.branching_sequence.join(' ') : g.branching_sequence,
+    g.necklaces, g.total_words
+  ]));
+  byId('previous-graphs').disabled = graphPage === 0;
+  byId('next-graphs').disabled = end === graphRows.length;
+}
+function cancelRequest(kind) {
+  const request = requests[kind];
+  if (!request) return;
+  requests[kind] = null;
+  clearTimeout(request.timer);
+  request.controller.abort();
+}
+async function requestJson(kind, url, payload, success) {
+  cancelRequest(kind);
+  const request = { controller: new AbortController(), timedOut: false, timer: null };
+  requests[kind] = request;
+  request.timer = setTimeout(() => { request.timedOut = true; request.controller.abort(); }, REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: request.controller.signal });
+    let data;
+    try { data = await response.json(); } catch (_) { throw new Error('The service returned an invalid response.'); }
+    if (requests[kind] !== request) return;
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('The service returned an invalid response.');
+    if (!response.ok || data.error) {
+      const error = typeof data.error === 'string' ? data.error : data.error && data.error.message;
+      throw new Error(error || 'The request failed.');
+    }
+    success(data);
+  } catch (error) {
+    if (requests[kind] !== request) return;
+    setError(kind, request.timedOut ? 'The request timed out.' : (error.message || 'The request failed.'));
+  } finally {
+    clearTimeout(request.timer);
+    if (requests[kind] === request) requests[kind] = null;
+  }
+}
+function renderPropertyTables(data = null) {
+  const source = data || {};
+  const w = source.word || {}, n = source.necklace || {}, d = source.dynamics || {};
+  const t = source.tree || {}, c = source.component || {}, p = source.power_set || {};
+  const census = p.census || {};
+  const fill = (id, rows) => properties(id, rows, data === null);
+  fill('word-properties', [
+    ['Length', w.length], ['Number of ones', w.weight], ['Parity', w.parity],
+    ['Complement', w.complement], ['Reversal', w.reversal], ['Palindrome', w.palindrome],
+    ['Primitive root', w.primitive_root], ['Least spatial period', w.spatial_period],
+    ['Adjacent-XOR image of the word', w.adjacent_xor]
+  ]);
+  fill('necklace-properties', [
+    ['Least rotation', n.least_rotation], ['Chirality', n.chirality],
+    ['Adjacent-XOR image (least representative)', n.image],
+    ['Self-complementary', n.self_complementary], ['Number of distinct rotations', n.spatial_period],
+    ['Preimage necklaces (least representatives)', n.preimages]
+  ]);
+  fill('dynamics-properties', [
+    ['Steps to the periodic part', d.transient_depth], ['First periodic word', d.cycle_entry],
+    ['Spatial period of the periodic part', d.periodic_spatial_period],
+    ['Temporal period of the periodic word', c.word_period],
+    ['Cycle length in the necklace quotient', c.cycle_length],
+    ['Right shifts after one necklace cycle', c.rotation_shift]
+  ]);
+  fill('component-properties', [
+    ['Graph type', c.graph_name], ['Tree root (necklace representative)', t.root],
+    ['Tree depth', t.depth], ['Tree levels (including the root)', t.levels],
+    ['Branching sequence', Array.isArray(t.branching_sequence) ? t.branching_sequence.join(' ') : t.branching_sequence],
+    ['Necklaces in this tree', t.necklaces], ['Words in this tree', t.words],
+    ['Necklaces in this component', c.necklaces], ['Words in this component', c.words]
+  ]);
+  fill('space-properties', [
+    ['Number of binary words', p.words], ['Number of binary necklaces', p.necklaces],
+    ['Primitive necklaces (spatial period n)', p.primitive_necklaces],
+    ['Weakly connected components', census.components], ['Graph types', census.graph_types]
+  ]);
+}
+
+function renderCalculation(data) {
+  if (data.api_version !== 'BNCT-a1' || !data.word || !data.necklace || !data.power_set) {
+    throw new Error('The calculator returned an incompatible response.');
+  }
+  renderPropertyTables(data);
+  const component = data.component || {}, census = data.power_set.census || {};
+  graphRows = census.status === 'exact' && Array.isArray(census.graphs) ? census.graphs : [];
+  renderGraphPage(0);
+  renderPreview(data.preview);
+  currentResult = data;
+  byId('download-results').hidden = false;
+  const errors = [];
+  if (component.status === 'deferred') errors.push('Some component properties could not be calculated.');
+  if (census.status === 'deferred') errors.push('The graph census could not be calculated.');
+  if (census.status === 'summary_only') errors.push('The graph table is too large to return.');
+  setError('calculation', errors.join('\n'));
+}
+function renderPreview(preview) {
+  const cycle = preview && preview.cycle, tree = preview && preview.tree;
+  const cycleItems = cycle && Array.isArray(cycle.items) ? cycle.items : [];
+  const treeItems = tree && Array.isArray(tree.items) ? tree.items : [];
+  byId('preview-section').hidden = !cycleItems.length && !treeItems.length;
+  byId('cycle-preview').hidden = !cycleItems.length;
+  byId('tree-preview').hidden = !treeItems.length;
+  byId('preview-cycle').replaceChildren(); byId('preview-tree').replaceChildren();
+  if (cycleItems.length) table('preview-cycle', ['Cycle step', 'Necklace representative'], cycleItems.map((word, i) => [i, word]), 'preview');
+  if (treeItems.length) table('preview-tree', ['Depth from root', 'Necklace representative'], treeItems.map(item => [item.depth, item.word]), 'preview');
+}
+function measureViewport() {
+  const bounds = viewport.getBoundingClientRect();
+  // Cover fractional CSS pixels too, keeping the native-scale offsets integral.
+  view.viewportWidth = Math.max(1, Math.ceil(bounds.width));
+  view.viewportHeight = Math.max(1, Math.ceil(bounds.height));
+}
+function setZoomBounds() {
+  view.minimum = Math.max(view.viewportWidth / view.width, view.viewportHeight / view.height);
+  view.maximum = Math.max(1, view.minimum);
+}
+function stopDrag(release = true) {
+  const drag = view.drag;
+  view.drag = null;
+  viewport.classList.remove('dragging');
+  if (release && drag && viewport.hasPointerCapture && viewport.hasPointerCapture(drag.id)) {
+    viewport.releasePointerCapture(drag.id);
+  }
+}
+function applyView() {
+  if (!view.loaded) {
+    byId('zoom-in').disabled = true;
+    byId('zoom-out').disabled = true;
+    return;
+  }
+  view.x = clamp(view.x, Math.min(0, view.viewportWidth - view.width * view.scale), 0);
+  view.y = clamp(view.y, Math.min(0, view.viewportHeight - view.height * view.scale), 0);
+  const x = view.scale === 1 ? Math.round(view.x) : view.x;
+  const y = view.scale === 1 ? Math.round(view.y) : view.y;
+  byId('image').style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + view.scale + ')';
+  byId('zoom-in').disabled = view.scale >= view.maximum - 1e-9;
+  byId('zoom-out').disabled = view.scale <= view.minimum + 1e-9;
+}
+function zoom(factor) {
+  if (!view.loaded) return;
+  stopDrag();
+  const scale = clamp(view.scale * factor, view.minimum, view.maximum);
+  const centerX = view.viewportWidth / 2, centerY = view.viewportHeight / 2;
+  view.x = centerX - (centerX - view.x) * scale / view.scale;
+  view.y = centerY - (centerY - view.y) * scale / view.scale;
+  view.scale = scale;
+  applyView();
+}
+function resizeView() {
+  stopDrag();
+  if (!view.loaded) { measureViewport(); return; }
+  const atMinimum = Math.abs(view.scale - view.minimum) < 1e-9;
+  const centerX = (view.viewportWidth / 2 - view.x) / view.scale;
+  const centerY = (view.viewportHeight / 2 - view.y) / view.scale;
+  measureViewport();
+  setZoomBounds();
+  view.scale = atMinimum ? view.minimum : clamp(view.scale, view.minimum, view.maximum);
+  view.x = view.viewportWidth / 2 - centerX * view.scale;
+  view.y = view.viewportHeight / 2 - centerY * view.scale;
+  applyView();
+}
+function renderImage(data, word) {
+  if (data.api_version !== 'BNCT-a1' || !data.image || data.image.mime_type !== 'image/png' || typeof data.image.base64 !== 'string') {
+    throw new Error('The tessellator returned an incompatible response.');
+  }
+  const generation = ++imageGeneration;
+  const url = 'data:image/png;base64,' + data.image.base64;
+  const candidate = new Image();
+  candidate.onload = () => {
+    if (generation !== imageGeneration) return;
+    if (!candidate.naturalWidth || !candidate.naturalHeight) {
+      setError('render', 'The tessellation image could not be opened.');
+      return;
+    }
+    stopDrag();
+    view.width = candidate.naturalWidth; view.height = candidate.naturalHeight;
+    view.loaded = true;
+    measureViewport(); setZoomBounds();
+    view.scale = view.maximum;
+    view.x = 0;
+    // Time runs upwards: begin at the first periodic row along the lower edge.
+    view.y = view.viewportHeight - view.height * view.scale;
+    const element = byId('image');
+    element.src = url;
+    element.style.width = view.width + 'px'; element.style.height = view.height + 'px';
+    applyView();
+    element.hidden = false;
+    loadingOverlay.style.display = 'none';
+    viewport.classList.add('has-image');
+    imageUrl = url; imageName = 'BNCT-n' + word.length + '.png';
+    byId('download-image').hidden = false;
+  };
+  candidate.onerror = () => {
+    if (generation === imageGeneration) setError('render', 'The tessellation image could not be opened.');
+  };
+  candidate.src = url;
+}
+function clearImage() {
+  ++imageGeneration;
+  stopDrag();
+  view.loaded = false; view.width = 0; view.height = 0;
+  view.scale = 1; view.minimum = 1; view.maximum = 1; view.x = 0; view.y = 0;
+  viewport.classList.remove('has-image');
+  loadingOverlay.style.display = 'none';
+  const element = byId('image');
+  element.hidden = true;
+  element.removeAttribute('src'); element.style.transform = '';
+  element.style.width = ''; element.style.height = '';
+  byId('download-image').hidden = true;
+  imageUrl = null; imageName = null;
+  applyView();
+}
+byId('zoom-in').addEventListener('click', () => zoom(Math.SQRT2));
+byId('zoom-out').addEventListener('click', () => zoom(1 / Math.SQRT2));
+viewport.addEventListener('pointerdown', event => {
+  if (!view.loaded || view.drag || event.isPrimary === false || event.button !== 0) return;
+  event.preventDefault();
+  view.drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  if (viewport.setPointerCapture) viewport.setPointerCapture(event.pointerId);
+  viewport.classList.add('dragging');
+});
+viewport.addEventListener('pointermove', event => {
+  const drag = view.drag;
+  if (!drag || drag.id !== event.pointerId) return;
+  event.preventDefault();
+  view.x += event.clientX - drag.x; view.y += event.clientY - drag.y;
+  drag.x = event.clientX; drag.y = event.clientY;
+  applyView();
+});
+for (const type of ['pointerup', 'pointercancel']) {
+  viewport.addEventListener(type, event => {
+    if (view.drag && view.drag.id === event.pointerId) stopDrag();
+  });
+}
+viewport.addEventListener('lostpointercapture', event => {
+  if (view.drag && view.drag.id === event.pointerId) stopDrag(false);
+});
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(resizeView).observe(viewport);
+else window.addEventListener('resize', resizeView);
+measureViewport();
+function clearResults() {
+  currentResult = null;
+  renderPropertyTables();
+  graphRows = []; renderGraphPage(0);
+  byId('preview-section').hidden = true;
+  byId('download-results').hidden = true;
+  clearImage();
+  setError('calculation'); setError('render');
+}
+byId('calculator-form').addEventListener('submit', event => {
+  event.preventDefault();
+  cancelRequest('calculation'); cancelRequest('render');
+  clearResults();
+  let word;
+  try { word = readWord(); } catch (error) { setError('calculation', error.message); byId('word').focus(); return; }
+  loadingOverlay.style.display = 'flex';
+  requestJson('calculation', ENDPOINTS.calculator, { bitstring: word, census: true, preview_limit: 16 }, renderCalculation);
+  requestJson('render', ENDPOINTS.tessellator, { bitstring: word }, data => renderImage(data, word));
+});
+byId('word').addEventListener('input', () => {
+  cancelRequest('calculation'); cancelRequest('render');
+  clearResults();
+});
+byId('previous-graphs').addEventListener('click', () => renderGraphPage(graphPage - 1));
+byId('next-graphs').addEventListener('click', () => renderGraphPage(graphPage + 1));
+function download(href, name) {
+  const link = document.createElement('a'); link.href = href; link.download = name;
+  document.body.append(link); link.click(); link.remove();
+}
+byId('download-results').addEventListener('click', () => {
+  if (!currentResult) return;
+  const blob = new Blob([JSON.stringify(currentResult, null, 2) + '\n'], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  download(url, 'BNCT-n' + currentResult.word.length + '.json');
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+byId('download-image').addEventListener('click', () => {
+  if (imageUrl) download(imageUrl, imageName);
+});
+renderPropertyTables();
+{ const results = byId('results'); results.style.height = results.offsetHeight + 'px'; }
+</script>
+</body>
+</html>
